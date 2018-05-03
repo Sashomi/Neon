@@ -19,10 +19,18 @@ namespace Zx
 	}
 
 	/*
-	@brief : Display the file, the line and the message of the exception
+	@brief : Display the file, the line, the message of the assert exception
 	*/
 	ZAssertException::ZAssertException(const ZString& file, int line, const ZString& message)
 	{
-		std::cout << "File : " << file << " - Line : " << line << " - Message : " << message << std::endl;
+		std::cout << "[EXCEPTION] File : " << file << " - Line : " << line << " - Message : " << message << std::endl;
+	}
+
+	/*
+	@brief : Display the file and the message of the operation failed exception
+	*/
+	ZOperationFailed::ZOperationFailed(const ZString& file, const ZString& message)
+	{
+		std::cout << "[EXCEPTION] File : " << file  << " - Message : " << message << std::endl;
 	}
 }

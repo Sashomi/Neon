@@ -25,5 +25,10 @@ namespace Zx
 		ZAssertException(const ZString& file, int line, const ZString& message);
 	};
 	#define ZAssert(condition) if (!(condition)) \
-		throw ZAssertException(__FILE__, __LINE__, "False condition\n\n -> " #condition)
+		throw ZAssertException(__FILE__, __LINE__, "False condition\n -> " #condition)
+
+	struct ZOperationFailed : public ZException
+	{
+		ZOperationFailed(const ZString& file, const ZString& message);
+	};
 }
