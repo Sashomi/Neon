@@ -30,3 +30,14 @@
 *.exe
 *.out
 *.app
+
+#Zanix
+Debug/*
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+.vs/*
+x64
+*.txt
+
