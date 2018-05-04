@@ -26,7 +26,7 @@ namespace Zx
 	*/
 	ZString ZFile::GetFilePath() const
 	{
-		ZAssert(IsExist());
+		ZAssert(!IsExist());
 		return ZString(boost::filesystem::canonical(m_path).string());
 	}
 
@@ -36,7 +36,7 @@ namespace Zx
 	*/
 	ZString ZFile::GetFileName() const
 	{
-		ZAssert(IsExist());
+		ZAssert(!IsExist());
 		return ZString(boost::filesystem::basename(m_path));
 	}
 
@@ -46,7 +46,7 @@ namespace Zx
 	*/
 	ZString ZFile::GetFileExtension() const
 	{
-		ZAssert(IsExist());
+		ZAssert(!IsExist());
 		return ZString(m_path.extension().string());
 	}
 }

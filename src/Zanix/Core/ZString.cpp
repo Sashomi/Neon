@@ -1,6 +1,6 @@
 #include <Zanix/Core/ZString.hpp>
 
-namespace Zx 
+namespace Zx
 {
 
 	/*
@@ -106,8 +106,8 @@ namespace Zx
 
 	/*
 	  @brief : Insert a "C" string into a ZString
-	  @param : The string
-	  @param : The pos to insert
+	  @param : The string to insert
+	  @param : The position where it should be inserted
 	 */
 	void ZString::Insert(const char * string, std::size_t pos)
 	{
@@ -126,8 +126,8 @@ namespace Zx
 
 	/*
 	  @brief : Insert a character into a ZString
-	  @param : The character
-	  @param : The pos to insert
+	  @param : The character to insert
+	  @param : The position where it should be inserted
 	 */
 	void ZString::Insert(char character, std::size_t pos)
 	{
@@ -136,8 +136,8 @@ namespace Zx
 
 	/*
 	  @brief : Insert a ZString into a ZString
-	  @param : The ZString
-	  @param : The pos to insert
+	  @param : The ZString to insert
+	  @param : The position where it should be inserted
 	 */
 	void ZString::Insert(const ZString& string, std::size_t pos)
 	{
@@ -146,17 +146,13 @@ namespace Zx
 
 	/*
 	  @brief : Replace a ZString by a "C" string
-	  @param : The "C" string
-	  @param : The position to begin
-	  @Note : If begin is superior to the size of ZString - 1
+	  @param : The "C" string to replace
+	  @param : The position to begin the replace
+	  @Note : An exception is throw if begin is superior to the size of ZString - 1
 	 */
 	void ZString::Replace(const char* string, std::size_t begin)
 	{
-		if (begin > GetSize() - 1)
-		{
-			std::cout << "Error : begin of the replace [" << begin << "] invalid !" << std::endl;
-			return;
-		}
+		ZAssert(begin > GetSize() - 1);
 
 		auto buffer = std::make_shared<ZString>(*this);
 
@@ -167,9 +163,9 @@ namespace Zx
 
 	/*
 	 @brief : Replace a ZString by a ZString
-	 @param : The ZString
-	 @param : The position to begin
-	 @Note : If begin is superior to the size of ZString - 1
+	 @param : The ZString to replace
+	 @param : The position to begin the replace
+	 @Note :An exception is throw if begin is superior to the size of ZString - 1
 	*/
 	void ZString::Replace(const ZString& string, std::size_t begin)
 	{
@@ -178,9 +174,9 @@ namespace Zx
 
 	/*
 	 @brief : Replace a ZString by a character
-	 @param : The character
-	 @param : The position to begin
-	 @Note : If begin is superior to the size of ZString - 1
+	 @param : The character to replace
+	 @param : The position to begin the replace
+	 @Note : An exception is throw if begin is superior to the size of ZString - 1
 	*/
 	void ZString::Replace(char character, std::size_t begin)
 	{
@@ -189,8 +185,8 @@ namespace Zx
 
 	/*
 	  @brief : Return true if the "C" string is contain into ZString, false otherwise
-	  @param : The "C" string
-	  @param : A pointer to the position of the begin of the string
+	  @param : The "C" string to search
+	  @param : A pointer to where to start the search
 	 */
 	bool ZString::Search(const char* string, std::size_t* pos) const
 	{
@@ -217,8 +213,8 @@ namespace Zx
 
 	/*
 	  @brief : Return true if the character is contain into ZString, false otherwise
-	  @param : The character
-	  @param : A pointer to the position of the character
+	  @param : The character to search
+	  @param : A pointer to where to start the search
 	 */
 	bool ZString::Search(char character, std::size_t* pos) const
 	{
@@ -235,8 +231,8 @@ namespace Zx
 
 	/*
 	  @brief : Return true if the ZString is contain into ZString, false otherwise
-	  @param : The ZString
-	  @param : A pointer to the position of the begin of the ZString
+	  @param : The ZString to search
+	  @param : A pointer to where to start the search
 	 */
 	bool ZString::Search(const ZString& string, std::size_t* pos) const
 	{
@@ -301,6 +297,9 @@ namespace Zx
 		return (s);
 	}
 
+	/*
+	@brief : Delete the content of a ZString
+	*/
 	void ZString::Clear()
 	{
 		m_string = std::shared_ptr<String>();
@@ -308,15 +307,15 @@ namespace Zx
 
 	//-------------------------------------------------------------------
 	/*
-	  @brief : Display a ZString
+	  @brief : Display a ZString to the out stream
 	  @param : The stream to display it
 	  @param : The ZString to display
 	*/
-	std::ostream& operator<<(std::ostream& flux, const ZString& string)
+	std::ostream& operator<<(std::ostream& stream, const ZString& string)
 	{
 		if (string.IsNull())
-			return (flux << "Error : ZString invalid (nullptr)");
-		return (flux << string.GetPtr());
+			return (stream << "Error : ZString invalid (nullptr)");
+		return (stream << string.GetPtr());
 	}
 
 	/*

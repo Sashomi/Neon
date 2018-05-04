@@ -9,6 +9,8 @@
 #include <memory>
 #include <string>
 
+#include "ZException.hpp"
+
 namespace Zx 
 {
 
