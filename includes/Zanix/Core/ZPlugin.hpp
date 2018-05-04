@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef ZPLUGIN_HPP
+#define ZPLUGIN_HPP
+
 #include <iostream>
 #include <Windows.h>
 
@@ -21,3 +24,5 @@ namespace Zx
 		HMODULE m_library;
 	};
 }
+
+#endif //ZPLUGIN_HPP

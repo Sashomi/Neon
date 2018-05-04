@@ -33,4 +33,12 @@ namespace Zx
 	{
 		std::cout << "[EXCEPTION] File : " << file  << " - Message : " << message << std::endl;
 	}
+
+	/*
+	@brief : Display the window's name and the message of the operation window exception
+	*/
+	ZWindowException::ZWindowException(const ZString& windowName, const ZString& message)
+	{
+		std::cout << "[EXCEPTION] Window : " << windowName << " - Message : " << message << std::endl;
+	}
 }

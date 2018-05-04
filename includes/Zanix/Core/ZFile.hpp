@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef ZFILE_HPP
+#define ZFILE_HPP
+
 #include <iostream>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -26,3 +29,5 @@ namespace Zx
 
 	};
 }
+
+#endif //ZFILE_HPP

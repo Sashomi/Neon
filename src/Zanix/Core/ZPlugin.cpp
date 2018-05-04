@@ -2,11 +2,17 @@
 
 namespace Zx
 {
+	/*
+		@brief : Constructor of ZPlugin
+	*/
 	template <typename T>
 	ZPlugin<T>::ZPlugin() : m_library(nullptr)
 	{
 	}
-
+	
+	/*
+		@brief : Destructor of ZPlugin
+	*/
 	template <typename T>
 	ZPlugin<T>::~ZPlugin()
 	{
@@ -14,6 +20,10 @@ namespace Zx
 			FreeLibrary(m_library);
 	}
 
+	/*
+		@brief : Load a plugin
+		@param : The name of the file to load
+	*/
 	template <typename T>
 	T* ZPlugin<T>::LoadPlugin(const ZString& pluginName)
 	{

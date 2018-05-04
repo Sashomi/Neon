@@ -10,18 +10,18 @@
 
 namespace Zx
 {
-	class ZALogger
+	class ZILogger
 	{
 	public:
-		ZALogger() = default;
+		ZILogger() = default;
 
-		virtual ~ZALogger() = default;
+		virtual ~ZILogger() = default;
 
-		static void SetLogger(std::shared_ptr<ZALogger>);
+		static void SetLogger(std::shared_ptr<ZILogger>);
 
 		virtual void Write(const ZString& message) = 0;
 
-		static std::shared_ptr<ZALogger>s_instance;
+		static std::shared_ptr<ZILogger>s_instance;
 	};
 }
 

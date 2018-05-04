@@ -1,6 +1,7 @@
 #include <Zanix/Core/ZString.hpp>
 
-namespace Zx {
+namespace Zx 
+{
 
 	/*
 	  @brief : Construct an empty ZString

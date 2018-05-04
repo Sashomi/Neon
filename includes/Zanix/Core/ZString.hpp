@@ -9,9 +9,11 @@
 #include <memory>
 #include <string>
 
-namespace Zx {
+namespace Zx 
+{
 
-  class ZString {
+  class ZString 
+  {
   
   public :
     ZString();

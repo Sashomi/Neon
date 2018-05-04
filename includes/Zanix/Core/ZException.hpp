@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef ZEXCEPTION_HPP
+#define ZEXCEPTION_HPP
+
 #include <iostream>
 #include <string>
 
@@ -31,4 +34,11 @@ namespace Zx
 	{
 		ZOperationFailed(const ZString& file, const ZString& message);
 	};
+
+	struct ZWindowException : public ZException
+	{
+		ZWindowException(const ZString& windowName, const ZString& message);
+	};
 }
+
+#endif //ZEXCEPTION_HPP
