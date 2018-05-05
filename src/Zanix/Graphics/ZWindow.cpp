@@ -5,7 +5,7 @@ namespace Zx
 	/*
 	@brief : Constructor of ZWindow
 	*/
-	ZWindow::ZWindow() noexcept : m_open(false), m_window(nullptr)
+	ZWindow::ZWindow() : m_open(false), m_window(nullptr)
 	{
 	}
 
@@ -30,12 +30,12 @@ namespace Zx
 	}
 
 	/*
-	@brief : Destroy the window
-	@note : Produce an assert exception if the window is open
+	@brief : Destroy the ZWindow
+	@note : Throw an assert exception if the window is open
 	*/
 	void ZWindow::DestroyWindow()
 	{
-		ZAssert(!IsOpen());
+		ZAssert(!IsOpen(), "You can't close a closed window");
 		glfwDestroyWindow(m_window);
 		glfwTerminate();
 		m_open = false;
@@ -51,7 +51,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Close the window
+	@brief : Close the ZWindow
 	@note : Requires the window to be open
 	*/
 	void ZWindow::CloseWindow()
@@ -61,21 +61,21 @@ namespace Zx
 	}
 
 	/*
-	@brief : Destroy the window
-	@param : The width of the window
-	@param : The height of the window
-	@note : Produce an assert exception if the window is not open
+	@brief : Change the size of the ZWindow
+	@param : The new width of the window
+	@param : The new height of the window
+	@note : Throw an assert exception if the window is close
 	*/
 	void ZWindow::SetWindowSize(int width, int height)
 	{
-		ZAssert(!IsOpen());
+		ZAssert(!IsOpen(), "You can't resize a closed window");
 		m_width = width;
 		m_height = height;
 		glfwSetWindowSize(m_window, width, height);
 	}
 
 	/*
-	@brief : Get the size of the window
+	@brief : Get the size of the ZWindow
 	@param : A pointer to the width
 	@param : A pointer to the height
 	*/
@@ -88,11 +88,11 @@ namespace Zx
 	/*
 	@brief : Change the title of the ZWindow
 	@param : The new title of the ZWindow
-	@note : Produce an assert exception if the window is not open
+	@note : Throw an assert exception if the window is close
 	*/
 	void ZWindow::SetWindowTitle(const ZString& title)
 	{
-		ZAssert(!IsOpen());
+		ZAssert(!IsOpen(), "You can't change the title of a closed window");
 		m_title = title;
 		glfwSetWindowTitle(m_window, m_title.GetPtr());
 	}

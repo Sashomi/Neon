@@ -4,7 +4,6 @@
 #define ZEXCEPTION_HPP
 
 #include <iostream>
-#include <string>
 
 #include <Zanix/Core/ZString.hpp>
 
@@ -17,7 +16,7 @@ namespace Zx
 
 		virtual ~ZException() noexcept = default;
 
-		virtual ZString GetMessage() noexcept;
+		virtual ZString GetMessage();
 
 	protected :
 		ZString m_message;
@@ -27,8 +26,12 @@ namespace Zx
 	{
 		ZAssertException(const ZString& file, int line, const ZString& message);
 	};
-	#define ZAssert(condition) if ((condition)) \
-		throw ZAssertException(__FILE__, __LINE__, "False condition\n -> " #condition)
+
+	/*
+	@Note : If the condition is true, then this is throw an exception
+	*/
+	#define ZAssert(condition, message) if ((condition)) \
+			throw ZAssertException(__FILE__, __LINE__, message)
 
 	struct ZOperationFailed : public ZException
 	{

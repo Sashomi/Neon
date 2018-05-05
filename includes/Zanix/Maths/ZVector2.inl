@@ -45,7 +45,7 @@ namespace Zx
 	template <typename T>
 	T ZVector2<T>::GetLenght() const
 	{
-		return (std::sqrt(GetSquaredLenght*()));
+		return (std::sqrt(GetSquaredLenght()));
 	}
 
 	/*
@@ -58,7 +58,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return a the addition with this ZVector2 and another ZVector2
+	@brief : Return the addition with this ZVector2 and another ZVector2
 	@param : The second ZVector2 to addition
 	*/
 	template <typename T>
@@ -87,7 +87,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return a reference constant to this ZVector2 (Macro +=)
+	@brief : Return a constant reference to this ZVector2 (Macro +=)
 	@param : The second ZVector2 to addition
 	*/
 	template <typename T>
@@ -119,7 +119,7 @@ namespace Zx
 	template <typename T>
 	ZVector2<T> ZVector2<T>::operator*(T v) const
 	{
-		return (ZVector2(x * v, y * v));
+		return (ZVector2<T>(x * v, y * v));
 	}
 
 	/*
@@ -128,12 +128,13 @@ namespace Zx
 	*/
 	template <typename T>
 	ZVector2<T> ZVector2<T>::operator/(T v) const
-	{
-		return (ZVector2(x / v, y / v));
+	{	
+		ZAssert(v == 0, "Division by zero");
+		return (ZVector2<T>(x / v, y / v));
 	}
 
 	/*
-	@brief : Return true if this ZVector2 and another ZVector2 is equal, false otherwise
+	@brief : Return true if this ZVector2 is equal with an another ZVector2, false otherwise
 	@param : The other ZVector2 to compare
 	*/
 	template <typename T>
@@ -143,7 +144,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return true if this ZVector2 and another ZVector2 is different, false otherwise
+	@brief : Return true if this ZVector2 is different with an another ZVector2, false otherwise
 	@param : The other ZVector2 to compare
 	*/
 	template <typename T>
@@ -157,7 +158,7 @@ namespace Zx
 @brief : Display in the out stream a ZVector2
 */
 template <typename T>
-std::ostream& operator <<(std::ostream& stream, const Zx::ZVector2<T>& vec)
+std::ostream& operator<<(std::ostream& stream, const Zx::ZVector2<T>& vec)
 {
 	return (stream << vec.x << " " << vec.y);
 }

@@ -3,8 +3,8 @@
 namespace Zx
 {
 	/*
-		@brief : Change the instance of the logger
-		@param : The new instance of the logger
+	@brief : Change the instance of the logger
+	@param : The new instance of the logger
 	*/
 	void ZILogger::SetLogger(std::shared_ptr<ZILogger> instance)
 	{

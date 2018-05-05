@@ -14,7 +14,9 @@ namespace Zx
 	class ZWindow
 	{
 	public :
-		ZWindow() noexcept;
+		ZWindow();
+		ZWindow(const ZWindow&) = delete;
+		ZWindow(ZWindow&&) = delete;
 
 		bool IsOpen();
 

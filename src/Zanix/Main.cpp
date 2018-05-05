@@ -1,14 +1,10 @@
 #include <iostream>
 
-#include <Zanix/Maths/ZVector2.hpp>
+int main(void) 
+{
+	//--------Zanix Engine--------
 
-int main(void) {
-
-	Zx::ZVector2<int> vec;
-
-	std::cout << vec << std::endl;
-
-	system("pause");
+	system("PAUSE");
   
   return 0;
 }

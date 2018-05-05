@@ -9,86 +9,82 @@
 #include <memory>
 #include <string>
 
-#include "ZException.hpp"
-
-namespace Zx 
+namespace Zx
 {
+	class ZString
+	{
+	public:
+		ZString();
+		ZString(const char*);
+		ZString(char);
+		ZString(const ZString&);
+		ZString(const std::string&);
+		ZString(ZString&&) noexcept;
 
-  class ZString 
-  {
-  
-  public :
-    ZString();
-    ZString(const char*);
-    ZString(char);
-    ZString(const ZString&);
-	ZString(const std::string&);
-    ZString(ZString&&) noexcept;
-    
-    virtual ~ZString();
-    
-    std::size_t GetSize() const;
-    
-    char* GetPtr() const;    
+		virtual ~ZString();
 
-    bool IsEmpty() const;
-    bool IsNull() const;
+		std::size_t GetSize() const;
 
-    void Insert(const char*, std::size_t pos);
-    void Insert(char, std::size_t pos);
-    void Insert(const ZString&, std::size_t pos);
+		char* GetPtr() const;
 
-    void Replace(const char*, std::size_t begin);
-    void Replace(const ZString&, std::size_t begin);
-    void Replace(char, std::size_t begin);
+		bool IsEmpty() const;
+		bool IsNull() const;
 
-    bool Search(const char*, std::size_t* pos) const;
-    bool Search(char character, std::size_t* pos) const;
-    bool Search(const ZString&, std::size_t* pos) const;
+		void Insert(const char*, std::size_t pos);
+		void Insert(char, std::size_t pos);
+		void Insert(const ZString&, std::size_t pos);
 
-	void Clear();
+		void Replace(const char*, std::size_t begin);
+		void Replace(const ZString&, std::size_t begin);
+		void Replace(char, std::size_t begin);
 
-    friend std::ostream& operator<<(std::ostream& flux, const ZString&);
+		bool Search(const char*, std::size_t* pos) const;
+		bool Search(char character, std::size_t* pos) const;
+		bool Search(const ZString&, std::size_t* pos) const;
 
-    ZString operator+(const ZString&) const;
-    ZString operator+(const char*) const;
-    ZString operator+(char) const;
+		void Clear();
 
-    ZString& operator=(const ZString&);
-    ZString& operator=(const char*);
-    ZString& operator=(ZString&&);
+		friend std::ostream& operator<<(std::ostream& flux, const ZString&);
 
-    ZString& operator+=(const ZString&);
-    ZString& operator+=(const char*);
-    ZString& operator+=(char);
+		ZString operator+(const ZString&) const;
+		ZString operator+(const char*) const;
+		ZString operator+(char) const;
 
-    bool operator==(const char*) const;
-    bool operator==(const ZString&) const;
-    bool operator==(char) const;
+		ZString& operator=(const ZString&);
+		ZString& operator=(const char*);
+		ZString& operator=(ZString&&);
 
-    bool operator!=(const char*) const;
-    bool operator!=(const ZString&) const;
-    bool operator!=(char) const;
+		ZString& operator+=(const ZString&);
+		ZString& operator+=(const char*);
+		ZString& operator+=(char);
 
-    static char ToUpper(char);
-    static ZString ToUpper(const ZString&);
+		bool operator==(const char*) const;
+		bool operator==(const ZString&) const;
+		bool operator==(char) const;
 
-    static char ToLower(char);
-    static ZString ToLower(const ZString&);
-  
-  private :
-    struct String;
+		bool operator!=(const char*) const;
+		bool operator!=(const ZString&) const;
+		bool operator!=(char) const;
 
-    std::shared_ptr<String> m_string;
-    
-    struct String {
-      inline String(std::size_t);    
-      
-      std::size_t size;
-      std::unique_ptr<char[]> str;
-    };
-  };
-  
+		static char ToUpper(char);
+		static ZString ToUpper(const ZString&);
+
+		static char ToLower(char);
+		static ZString ToLower(const ZString&);
+
+	private:
+		struct String;
+
+		std::shared_ptr<String> m_string;
+
+		struct String {
+			inline String(std::size_t);
+
+			std::size_t size;
+			std::unique_ptr<char[]> str;
+		};
+	};
+
 }
 
 #include "ZString.inl"

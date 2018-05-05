@@ -26,7 +26,7 @@ namespace Zx
 		const ZVector2& operator+() const;
 		ZVector2 operator+(const ZVector2&) const;
 		
-		const ZVector2& operator-() const;
+		ZVector2 operator-() const;
 		ZVector2 operator-(const ZVector2&) const;
 
 		ZVector2& operator+=(const ZVector2&);

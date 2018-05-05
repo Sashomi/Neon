@@ -3,7 +3,7 @@
 namespace Zx
 {
 	/*
-		@brief : Constructor of ZPlugin
+	@brief : Constructor of ZPlugin
 	*/
 	template <typename T>
 	ZPlugin<T>::ZPlugin() : m_library(nullptr)
@@ -11,7 +11,7 @@ namespace Zx
 	}
 	
 	/*
-		@brief : Destructor of ZPlugin
+	@brief : Destructor of ZPlugin
 	*/
 	template <typename T>
 	ZPlugin<T>::~ZPlugin()
@@ -21,8 +21,8 @@ namespace Zx
 	}
 
 	/*
-		@brief : Load a plugin
-		@param : The name of the file to load
+	@brief : Load a plugin
+	@param : The name of the plugin to load
 	*/
 	template <typename T>
 	T* ZPlugin<T>::LoadPlugin(const ZString& pluginName)

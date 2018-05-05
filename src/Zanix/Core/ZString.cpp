@@ -1,4 +1,5 @@
 #include <Zanix/Core/ZString.hpp>
+#include <Zanix/Core/ZException.hpp>
 
 namespace Zx
 {
@@ -152,7 +153,7 @@ namespace Zx
 	 */
 	void ZString::Replace(const char* string, std::size_t begin)
 	{
-		ZAssert(begin > GetSize() - 1);
+		ZAssert(begin > GetSize() - 1, "The beginning of the replacement is overflowing");
 
 		auto buffer = std::make_shared<ZString>(*this);
 
@@ -481,7 +482,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return true if the ZString is not equal to the current object, false otherwise
+	  @brief : Return true if the ZString is not equal to this ZString, false otherwise
 	  @param : The ZString to compare
 	*/
 	bool ZString::operator!=(const ZString& string) const
@@ -490,7 +491,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return true if the character is not equal to the current object, false otherwise
+	  @brief : Return true if the character is not equal to this ZString, false otherwise
 	  @param : The character to compare
 	*/
 	bool ZString::operator!=(char character) const

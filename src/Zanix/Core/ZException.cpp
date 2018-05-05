@@ -13,7 +13,7 @@ namespace Zx
 	/*
 	@brief : Return the message of the exception
 	*/
-	ZString ZException::GetMessage() noexcept
+	ZString ZException::GetMessage()
 	{
 		return m_message;
 	}
@@ -31,7 +31,7 @@ namespace Zx
 	*/
 	ZOperationFailed::ZOperationFailed(const ZString& file, const ZString& message)
 	{
-		std::cout << "[EXCEPTION] File : " << file  << " - Message : " << message << std::endl;
+		std::cout << "[EXCEPTION] File : " << file << " - Message : " << message << std::endl;
 	}
 
 	/*
