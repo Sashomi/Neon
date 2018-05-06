@@ -37,7 +37,7 @@ namespace Zx
 
 	/*
 	  @brief : Copy construct
-	  @param : The ZString to copy
+	  @param : A constant reference to the ZString to copy
 	 */
 	ZString::ZString(const ZString& string)
 	{
@@ -47,7 +47,7 @@ namespace Zx
 
 	/*
 	@brief : Copy construct with std::string
-	@param : The std::string to copy
+	@param : A constant reference to the std::string to copy
 	*/
 	ZString::ZString(const std::string& string)
 	{
@@ -137,7 +137,7 @@ namespace Zx
 
 	/*
 	  @brief : Insert a ZString into a ZString
-	  @param : The ZString to insert
+	  @param : A constant reference to the ZString to insert
 	  @param : The position where it should be inserted
 	 */
 	void ZString::Insert(const ZString& string, std::size_t pos)
@@ -232,7 +232,7 @@ namespace Zx
 
 	/*
 	  @brief : Return true if the ZString is contain into ZString, false otherwise
-	  @param : The ZString to search
+	  @param : A constant reference to the ZString to search
 	  @param : A pointer to where to start the search
 	 */
 	bool ZString::Search(const ZString& string, std::size_t* pos) const
@@ -254,7 +254,7 @@ namespace Zx
 
 	/*
 	  @brief : Return a upper ZString
-	  @param : The ZString
+	  @param : A constant reference to the ZString 
 	*/
 	ZString ZString::ToUpper(const ZString& string)
 	{
@@ -283,7 +283,7 @@ namespace Zx
 
 	/*
 	  @brief : Return a upper ZString
-	  @param : The ZString
+	  @param : A constant reference to the ZString
 	*/
 	ZString ZString::ToLower(const ZString& string)
 	{
@@ -310,7 +310,7 @@ namespace Zx
 	/*
 	  @brief : Display a ZString to the out stream
 	  @param : The stream to display it
-	  @param : The ZString to display
+	  @param : A constant reference to the ZString to display
 	*/
 	std::ostream& operator<<(std::ostream& stream, const ZString& string)
 	{
@@ -321,7 +321,7 @@ namespace Zx
 
 	/*
 	  @brief : Affect a ZString to the current object
-	  @param : The ZString to copy
+	  @param : A constant reference to the ZString to copy
 	*/
 	ZString& ZString::operator=(const ZString& string)
 	{
@@ -363,7 +363,7 @@ namespace Zx
 
 	/*
 	  @brief : Add a ZString to the current object
-	  @param : The ZString to add
+	  @param : A constant reference to the ZString to add
 	*/
 	ZString ZString::operator+(const ZString& string) const
 	{
@@ -414,7 +414,7 @@ namespace Zx
 
 	/*
 	  @brief : Add a ZString to the current object (macro)
-	  @param : The ZString to add
+	  @param : A constant reference to the ZString to add
 	*/
 	ZString& ZString::operator+=(const ZString& string)
 	{
@@ -456,7 +456,7 @@ namespace Zx
 
 	/*
 	  @brief : Return true if the ZString is equal to the current object, false otherwise
-	  @param : The ZString to compare
+	  @param : A constant reference to the ZString to compare
 	*/
 	bool ZString::operator==(const ZString& string) const
 	{
@@ -483,7 +483,7 @@ namespace Zx
 
 	/*
 	  @brief : Return true if the ZString is not equal to this ZString, false otherwise
-	  @param : The ZString to compare
+	  @param : A constant reference to the ZString to compare
 	*/
 	bool ZString::operator!=(const ZString& string) const
 	{

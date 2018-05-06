@@ -26,7 +26,7 @@ namespace Zx
 		void SetWindowTitle(const ZString& title);
 		void SetWindowSize(int width, int height);
 
-		void GetWindowTitle(ZString* title) const;
+		ZString GetWindowTitle() const;
 		void GetWindowSize(int *width, int *height) const;
 
 	private :

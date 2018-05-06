@@ -4,7 +4,7 @@ namespace Zx
 {
 	/*
 	@brief : Construct of ZException
-	@param : The message of the exception
+	@param : A constant reference to the message of the exception
 	*/
 	ZException::ZException(const ZString& message) : m_message(message)
 	{
@@ -20,6 +20,9 @@ namespace Zx
 
 	/*
 	@brief : Display the file, the line, the message of the assert exception
+	@param : A constant reference to the file where the ZAssertException is throw
+	@param : The line where the ZAssertException is throw
+	@param : A constant reference to the message to display
 	*/
 	ZAssertException::ZAssertException(const ZString& file, int line, const ZString& message)
 	{
@@ -28,6 +31,8 @@ namespace Zx
 
 	/*
 	@brief : Display the file and the message of the operation failed exception
+	@param : A constant reference to the file where ZOperationFailed is throw
+	@param : A constant reference to the message to display
 	*/
 	ZOperationFailed::ZOperationFailed(const ZString& file, const ZString& message)
 	{
@@ -36,6 +41,8 @@ namespace Zx
 
 	/*
 	@brief : Display the window's name and the message of the operation window exception
+	@param : A constant reference to the name of the window where ZWindowException is throw
+	@param : A constant reference to the message to display
 	*/
 	ZWindowException::ZWindowException(const ZString& windowName, const ZString& message)
 	{

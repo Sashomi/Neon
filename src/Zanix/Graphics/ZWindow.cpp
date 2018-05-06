@@ -13,7 +13,7 @@ namespace Zx
 	@brief : Create a ZWindow
 	@param : The width of the window
 	@param : The height of the window
-	@param : The title of the window
+	@param : A constant reference to the title of the window
 	*/
 	void ZWindow::CreateWindow(int width, int height, const ZString& title)
 	{
@@ -87,7 +87,7 @@ namespace Zx
 
 	/*
 	@brief : Change the title of the ZWindow
-	@param : The new title of the ZWindow
+	@param : A constant reference to the new title of the ZWindow
 	@note : Throw an assert exception if the window is close
 	*/
 	void ZWindow::SetWindowTitle(const ZString& title)
@@ -98,11 +98,10 @@ namespace Zx
 	}
 
 	/*
-	@brief : Get the title of the window
-	@param : A pointer to the title of the window
+	@brief : Return the title of the ZWindow
 	*/
-	void ZWindow::GetWindowTitle(ZString* title) const
+	ZString ZWindow::GetWindowTitle() const
 	{
-		*title = m_title;
+		return (ZString(m_title));
 	}
 }

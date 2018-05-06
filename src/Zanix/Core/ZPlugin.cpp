@@ -22,7 +22,7 @@ namespace Zx
 
 	/*
 	@brief : Load a plugin
-	@param : The name of the plugin to load
+	@param : A constant reference to the name of the plugin to load
 	*/
 	template <typename T>
 	T* ZPlugin<T>::LoadPlugin(const ZString& pluginName)

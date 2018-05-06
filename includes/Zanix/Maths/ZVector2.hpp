@@ -5,8 +5,6 @@
 
 #include <iostream>
 
-#include <Zanix/Core/ZString.hpp>
-
 namespace Zx
 {
 	template <typename T>
@@ -14,11 +12,13 @@ namespace Zx
 	{
 	public :
 		ZVector2() = default;
-		ZVector2(T x, T y);
+		ZVector2(T newX, T newY);
 		ZVector2(const ZVector2&);
 		ZVector2(ZVector2&&) noexcept;
 
 		~ZVector2() = default;
+
+		void SetVector2(T newX, T newY);
 
 		T GetSquaredLenght() const;
 		T GetLenght() const;
@@ -29,8 +29,8 @@ namespace Zx
 		ZVector2 operator-() const;
 		ZVector2 operator-(const ZVector2&) const;
 
-		ZVector2& operator+=(const ZVector2&);
-		ZVector2& operator-=(const ZVector2&);
+		const ZVector2& operator+=(const ZVector2&);
+		const ZVector2& operator-=(const ZVector2&);
 
 		ZVector2 operator*(T v) const;
 		ZVector2 operator/(T v) const;
@@ -38,13 +38,12 @@ namespace Zx
 		bool operator==(const ZVector2&) const;
 		bool operator!=(const ZVector2&) const;
 
-		T x;
-		T y;
+		T x, y;
 	};
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& flux, const Zx::ZVector2<T>&);
+std::ostream& operator<<(std::ostream& stream, const Zx::ZVector2<T>&);
 
 #include "ZVector2.inl"
 

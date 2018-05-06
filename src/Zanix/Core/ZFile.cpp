@@ -6,7 +6,7 @@ namespace Zx
 {
 	/*
 	@brief : Construct of ZFile
-	@param : The file path of the file
+	@param : A constant reference to the file path of the file
 	*/
 	ZFile::ZFile(const ZString& filePath) : m_path(filePath.GetPtr())
 	{
