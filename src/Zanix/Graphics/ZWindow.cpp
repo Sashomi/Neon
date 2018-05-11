@@ -10,7 +10,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Create a ZWindow
+	@brief : Creates a ZWindow
 	@param : The width of the window
 	@param : The height of the window
 	@param : A constant reference to the title of the window
@@ -30,7 +30,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Destroy the ZWindow
+	@brief : Destroys the ZWindow
 	@note : Throw an assert exception if the window is open
 	*/
 	void ZWindow::DestroyWindow()
@@ -42,7 +42,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return true if the windows is close, false otherwise
+	@brief : Returns true if the windows is close, false otherwise
 	*/
 	bool ZWindow::IsOpen()
 	{
@@ -51,7 +51,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Close the ZWindow
+	@brief : Closes the ZWindow
 	@note : Requires the window to be open
 	*/
 	void ZWindow::CloseWindow()
@@ -61,7 +61,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Change the size of the ZWindow
+	@brief : Changes the size of the ZWindow
 	@param : The new width of the window
 	@param : The new height of the window
 	@note : Throw an assert exception if the window is close
@@ -75,7 +75,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Get the size of the ZWindow
+	@brief : Gets the size of the ZWindow
 	@param : A pointer to the width
 	@param : A pointer to the height
 	*/
@@ -86,7 +86,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Change the title of the ZWindow
+	@brief : Changes the title of the ZWindow
 	@param : A constant reference to the new title of the ZWindow
 	@note : Throw an assert exception if the window is close
 	*/
@@ -98,7 +98,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return the title of the ZWindow
+	@brief : Returns the title of the ZWindow
 	*/
 	ZString ZWindow::GetWindowTitle() const
 	{

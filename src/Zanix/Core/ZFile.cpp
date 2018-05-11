@@ -5,7 +5,7 @@
 namespace Zx 
 {
 	/*
-	@brief : Construct of ZFile
+	@brief : Constructs of ZFile
 	@param : A constant reference to the file path of the file
 	*/
 	ZFile::ZFile(const ZString& filePath) : m_path(filePath.GetPtr())
@@ -13,7 +13,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return true if the ZFile exist, false otherwise
+	@brief : Returns true if the ZFile exist, false otherwise
 	*/
 	bool ZFile::IsExist() const
 	{
@@ -21,7 +21,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return the complete file path of the file
+	@brief : Returns the complete file path of the file
 	@note : Throw an exception if the file doesn't exist
 	*/
 	ZString ZFile::GetFilePath() const
@@ -31,7 +31,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return the name of the file, without extension
+	@brief : Returns the name of the file, without extension
 	@note : Throw an exception if the file doesn't exist
 	*/
 	ZString ZFile::GetFileName() const
@@ -41,7 +41,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return the extension of the file
+	@brief : Returns the extension of the file
 	@note : Throw an exception if the file doesn't exist
 	*/
 	ZString ZFile::GetFileExtension() const

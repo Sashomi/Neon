@@ -1,15 +1,14 @@
 #include <iostream>
 
-#include <Zanix/Maths/ZVector3.hpp>
+#include <Zanix/Maths/ZMatrix4.hpp>
 
 int main(void) 
 {
 	//--------Zanix Engine--------
 
-	Zx::ZVector3<int> v(10, 10, 10);
-	Zx::ZVector3<int> v2;
+	Zx::ZMatrix4<int>test;
 
-	std::cout << v + v2 << std::endl;
+	test = test.GetInverse();
 
 	system("PAUSE");
   

@@ -3,7 +3,7 @@
 namespace Zx
 {
 	/*
-	@brief : Construct a ZVector3 with 3 components
+	@brief : Constructs a ZVector3 with 3 components
 	@param : The first component (x)
 	@param : The second component (y)
 	@param : The third component (z)
@@ -23,7 +23,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Movement constructor : Move the component of another ZVector3
+	@brief : Movement constructor : Moves the component of another ZVector3
 	@param : The ZVector3 to move
 	*/
 	template <typename T>
@@ -35,7 +35,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Change the value of the components (x, y)
+	@brief : Changes the value of the components (x, y)
 	@param : The new value of the x component
 	@param : The new value of the y component
 	@param : The new value of the z component
@@ -49,7 +49,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return the squared lenght of a ZVector3(x² + y² + z²)
+	@brief : Returns the squared lenght of a ZVector3(x² + y² + z²)
 	*/
 	template <typename T>
 	T ZVector3<T>::GetSquaredLenght() const
@@ -58,7 +58,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return the lenght of a ZVector3 (sqrt(x² + y² + z²))
+	@brief : Returns the lenght of a ZVector3 (sqrt(x² + y² + z²))
 	*/
 	template <typename T>
 	T ZVector3<T>::GetLenght() const
@@ -67,7 +67,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return a constant reference to this ZVector3
+	@brief : Returns a constant reference to this ZVector3
 	*/
 	template <typename T>
 	const ZVector3<T>& ZVector3<T>::operator+() const
@@ -76,7 +76,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return the addition with this ZVector3 and another ZVector3
+	@brief : Returns the addition with this ZVector3 and another ZVector3
 	@param : A constant reference to the second ZVector3 to addition
 	*/
 	template <typename T>
@@ -86,7 +86,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return the negates of the x, y and z components
+	@brief : Returns the negates of the x, y and z components
 	*/
 	template <typename T>
 	ZVector3<T> ZVector3<T>::operator-() const
@@ -95,7 +95,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return a the difference with this ZVector3 and another ZVector3
+	@brief : Returns a the difference with this ZVector3 and another ZVector3
 	@param : A reference constant to thhe second ZVector3 to substract
 	*/
 	template <typename T>
@@ -105,7 +105,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return a constant reference of the addition of this ZVector3 and another ZVector3 (Macro +=)
+	@brief : Returns a constant reference of the addition of this ZVector3 and another ZVector3 (Macro +=)
 	@param : A constant reference to the second ZVector3 to addition
 	*/
 	template <typename T>
@@ -119,7 +119,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return a constant reference of the substract of this ZVector3 and another ZVector3 (Macro -=)
+	@brief : Returns a constant reference of the substract of this ZVector3 and another ZVector3 (Macro -=)
 	@param : A constant reference to the second ZVector3 to substract
 	*/
 	template <typename T>
@@ -133,7 +133,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return the result of the multiplication of this ZVector3 with a scalar
+	@brief : Returns the result of the multiplication of this ZVector3 with a scalar
 	@param : The value to multiply
 	*/
 	template <typename T>
@@ -143,7 +143,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return the result of the division of this ZVector3 with a scalar
+	@brief : Returns the result of the division of this ZVector3 with a scalar
 	@param : The value to divide
 	*/
 	template <typename T>
@@ -154,7 +154,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return true if this ZVector3 is equal with an another ZVector3, false otherwise
+	@brief : Returns true if this ZVector3 is equal with an another ZVector3, false otherwise
 	@param : A constant reference to the other ZVector3 to compare
 	*/
 	template <typename T>
@@ -164,7 +164,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Return true if this ZVector3 is different with an another ZVector3, false otherwise
+	@brief : Returns true if this ZVector3 is different with an another ZVector3, false otherwise
 	@param : A constant reference to the other ZVector3 to compare
 	*/
 	template <typename T>
@@ -175,7 +175,7 @@ namespace Zx
 }
 
 /*
-@brief : Display in the out stream a ZVector3
+@brief : Displays in the out stream a ZVector3
 @param : The stream to display
 @param : A constant reference to the ZVector3 to display
 */

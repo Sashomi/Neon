@@ -5,7 +5,7 @@ namespace Zx
 {
 
 	/*
-	  @brief : Construct an empty ZString
+	  @brief : Constructs an empty ZString
 	 */
 	ZString::ZString()
 	{
@@ -13,7 +13,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Contruct an ZString base on "C" string
+	  @brief : Contructs an ZString base on "C" string
 	  @param : The string
 	 */
 	ZString::ZString(const char* string)
@@ -26,7 +26,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Construct an ZString with a character
+	  @brief : Constructs an ZString with a character
 	  @param : The character
 	 */
 	ZString::ZString(char character)
@@ -36,7 +36,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Copy construct
+	  @brief : Copy constructor
 	  @param : A constant reference to the ZString to copy
 	 */
 	ZString::ZString(const ZString& string)
@@ -46,7 +46,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Copy construct with std::string
+	@brief : Constructs ZString with std::string
 	@param : A constant reference to the std::string to copy
 	*/
 	ZString::ZString(const std::string& string)
@@ -74,7 +74,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Get the size of a ZString
+	  @brief : Gets the size of a ZString
 	 */
 	std::size_t ZString::GetSize() const
 	{
@@ -82,7 +82,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Get a pointer to the string
+	  @brief : Gets a pointer to the string
 	 */
 	char* ZString::GetPtr() const
 	{
@@ -90,7 +90,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return true if the ZString is empty, false otherwise
+	  @brief : Returns true if the ZString is empty, false otherwise
 	 */
 	bool ZString::IsEmpty() const
 	{
@@ -98,7 +98,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return null if a ZString is null, false otherwise
+	  @brief : Returns null if a ZString is null, false otherwise
 	 */
 	bool ZString::IsNull() const
 	{
@@ -106,7 +106,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Insert a "C" string into a ZString
+	  @brief : Inserts a "C" string into a ZString
 	  @param : The string to insert
 	  @param : The position where it should be inserted
 	 */
@@ -126,7 +126,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Insert a character into a ZString
+	  @brief : Inserts a character into a ZString
 	  @param : The character to insert
 	  @param : The position where it should be inserted
 	 */
@@ -136,7 +136,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Insert a ZString into a ZString
+	  @brief : Inserts a ZString into a ZString
 	  @param : A constant reference to the ZString to insert
 	  @param : The position where it should be inserted
 	 */
@@ -146,7 +146,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Replace a ZString by a "C" string
+	  @brief : Replaces a ZString by a "C" string
 	  @param : The "C" string to replace
 	  @param : The position to begin the replace
 	  @Note : An exception is throw if begin is superior to the size of ZString - 1
@@ -163,7 +163,7 @@ namespace Zx
 	}
 
 	/*
-	 @brief : Replace a ZString by a ZString
+	 @brief : Replaces a ZString by a ZString
 	 @param : The ZString to replace
 	 @param : The position to begin the replace
 	 @Note :An exception is throw if begin is superior to the size of ZString - 1
@@ -174,7 +174,7 @@ namespace Zx
 	}
 
 	/*
-	 @brief : Replace a ZString by a character
+	 @brief : Replaces a ZString by a character
 	 @param : The character to replace
 	 @param : The position to begin the replace
 	 @Note : An exception is throw if begin is superior to the size of ZString - 1
@@ -185,7 +185,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return true if the "C" string is contain into ZString, false otherwise
+	  @brief : Returns true if the "C" string is contain into ZString, false otherwise
 	  @param : The "C" string to search
 	  @param : A pointer to where to start the search
 	 */
@@ -213,7 +213,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return true if the character is contain into ZString, false otherwise
+	  @brief : Returns true if the character is contain into ZString, false otherwise
 	  @param : The character to search
 	  @param : A pointer to where to start the search
 	 */
@@ -231,7 +231,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return true if the ZString is contain into ZString, false otherwise
+	  @brief : Returns true if the ZString is contain into ZString, false otherwise
 	  @param : A constant reference to the ZString to search
 	  @param : A pointer to where to start the search
 	 */
@@ -241,7 +241,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return a upper character
+	  @brief : Returns a upper character
 	  @param : The character
 	*/
 	char ZString::ToUpper(char character)
@@ -253,7 +253,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return a upper ZString
+	  @brief : Returns a upper ZString
 	  @param : A constant reference to the ZString 
 	*/
 	ZString ZString::ToUpper(const ZString& string)
@@ -270,7 +270,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return a lower character
+	  @brief : Returns a lower character
 	  @param : The character
 	*/
 	char ZString::ToLower(char character)
@@ -282,7 +282,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return a upper ZString
+	  @brief : Returns a upper ZString
 	  @param : A constant reference to the ZString
 	*/
 	ZString ZString::ToLower(const ZString& string)
@@ -299,7 +299,7 @@ namespace Zx
 	}
 
 	/*
-	@brief : Delete the content of a ZString
+	@brief : Deletes the content of a ZString
 	*/
 	void ZString::Clear()
 	{
@@ -308,7 +308,7 @@ namespace Zx
 
 	//-------------------------------------------------------------------
 	/*
-	  @brief : Display a ZString to the out stream
+	  @brief : Displays a ZString to the out stream
 	  @param : The stream to display it
 	  @param : A constant reference to the ZString to display
 	*/
@@ -320,7 +320,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Affect a ZString to the current object
+	  @brief : Affects a ZString to the current object
 	  @param : A constant reference to the ZString to copy
 	*/
 	ZString& ZString::operator=(const ZString& string)
@@ -337,7 +337,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Affect a "C" string to the current object
+	  @brief : Affects a "C" string to the current object
 	  @param : The "C" string to copy
 	*/
 	ZString& ZString::operator=(const char* string)
@@ -349,7 +349,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Move the ZString to the current object
+	  @brief : Moves the ZString to the current object
 	  @param : The ZString to move
 	*/
 	ZString& ZString::operator=(ZString&& string)
@@ -362,7 +362,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Add a ZString to the current object
+	  @brief : Adds a ZString to the current object
 	  @param : A constant reference to the ZString to add
 	*/
 	ZString ZString::operator+(const ZString& string) const
@@ -380,7 +380,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Add a "C" string to the current object
+	  @brief : Adds a "C" string to the current object
 	  @param : The "C" string to add
 	*/
 	ZString ZString::operator+(const char* string) const
@@ -398,7 +398,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Add a character to the current object
+	  @brief : Adds a character to the current object
 	  @param : The character to add
 	*/
 	ZString ZString::operator+(char character) const
@@ -413,7 +413,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Add a ZString to the current object (macro)
+	  @brief : Adds a ZString to the current object (macro)
 	  @param : A constant reference to the ZString to add
 	*/
 	ZString& ZString::operator+=(const ZString& string)
@@ -424,7 +424,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Add a "C" string to the current object (macro)
+	  @brief : Adds a "C" string to the current object (macro)
 	  @param : The "C" string to add
 	*/
 	ZString& ZString::operator+=(const char* string)
@@ -435,7 +435,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Add a character to the current object (macro)
+	  @brief : Adds a character to the current object (macro)
 	  @param : The character to add
 	*/
 	ZString& ZString::operator+=(char character)
@@ -446,7 +446,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return true if the "C" string is equal to the current object, false otherwise
+	  @brief : Returns true if the "C" string is equal to the current object, false otherwise
 	  @param : The "C" string to compare
 	*/
 	bool ZString::operator==(const char* string) const
@@ -455,7 +455,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return true if the ZString is equal to the current object, false otherwise
+	  @brief : Returns true if the ZString is equal to the current object, false otherwise
 	  @param : A constant reference to the ZString to compare
 	*/
 	bool ZString::operator==(const ZString& string) const
@@ -464,7 +464,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return true if the character is equal to the current object, false otherwise
+	  @brief : Returns true if the character is equal to the current object, false otherwise
 	  @param : The character to compare
 	*/
 	bool ZString::operator==(char character) const
@@ -473,7 +473,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return true if the "C" string is not equal to the current object, false otherwise
+	  @brief : Returns true if the "C" string is not equal to the current object, false otherwise
 	  @param : The "C" string to compare
 	*/
 	bool ZString::operator!=(const char* string) const
@@ -482,7 +482,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return true if the ZString is not equal to this ZString, false otherwise
+	  @brief : Returns true if the ZString is not equal to this ZString, false otherwise
 	  @param : A constant reference to the ZString to compare
 	*/
 	bool ZString::operator!=(const ZString& string) const
@@ -491,7 +491,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Return true if the character is not equal to this ZString, false otherwise
+	  @brief : Returns true if the character is not equal to this ZString, false otherwise
 	  @param : The character to compare
 	*/
 	bool ZString::operator!=(char character) const
