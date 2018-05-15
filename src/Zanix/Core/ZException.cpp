@@ -11,14 +11,6 @@ namespace Zx
 	}
 
 	/*
-	@brief : Returns the message of the exception
-	*/
-	ZString ZException::GetMessage()
-	{
-		return m_message;
-	}
-
-	/*
 	@brief : Displays the file, the line, the message of the assert exception
 	@param : A constant reference to the file where the ZAssertException is throw
 	@param : The line where the ZAssertException is throw

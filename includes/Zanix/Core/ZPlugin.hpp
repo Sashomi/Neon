@@ -4,25 +4,32 @@
 #define ZPLUGIN_HPP
 
 #include <iostream>
-#include <Windows.h>
+#include <memory>
 
-#include <Zanix/Core/ZString.hpp>
-#include <Zanix/Core/ZException.hpp>
+#include <Zanix/ZUtils.hpp>
 
 namespace Zx
 {
+	class ZString;
+
+	template <typename T>
+	class ZPluginPlatform;
+
 	template <typename T>
 	class ZPlugin
 	{
 	public :
-		ZPlugin();
-		~ZPlugin();
+		ZPlugin() = delete;
+		~ZPlugin() = delete;
 
-		T* LoadPlugin(const ZString& pluginName);
+		static T* LoadPlugin(const ZString& pluginName);
+		static void UnloadPlugin();
+
 	private :
-		typedef T* (*m_fnptr);
-		HMODULE m_library;
+		static std::shared_ptr<ZPluginPlatform<T>> m_platform;
 	};
 }
+
+#include "ZPlugin.inl"
 
 #endif //ZPLUGIN_HPP

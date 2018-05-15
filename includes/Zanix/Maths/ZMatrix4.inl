@@ -358,6 +358,8 @@ namespace Zx
 	template <typename T>
 	const ZMatrix4<T>& ZMatrix4<T>::operator/=(T scale)
 	{
+		ZAssert(scale != 0, "Division by zero");
+
 		c11 /= scale; c12 /= scale; c13 /= scale; c14 /= scale;
 		c21 /= scale; c22 /= scale; c23 /= scale; c24 /= scale;
 		c31 /= scale; c32 /= scale; c33 /= scale; c34 /= scale;
@@ -417,7 +419,7 @@ namespace Zx
 	template <typename T>
 	ZMatrix4<T>::operator const T*() const
 	{
-		return &c11;
+		return (&c11);
 	}
 
 	/*
@@ -426,7 +428,7 @@ namespace Zx
 	template <typename T>
 	ZMatrix4<T>::operator T*()
 	{
-		return &c11;
+		return (&c11);
 	}
 }
 

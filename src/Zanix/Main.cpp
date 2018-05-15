@@ -1,14 +1,15 @@
 #include <iostream>
 
-#include <Zanix/Maths/ZMatrix4.hpp>
+#include <Zanix/Core/ZPlugin.hpp>
+#include <Zanix/Core/ZString.hpp>
+#include <Zanix/Core/ZException.hpp>
+#include <Zanix/Renderer/ZRenderer.hpp>
+
+using namespace Zx;
 
 int main(void) 
 {
-	//--------Zanix Engine--------
-
-	Zx::ZMatrix4<int>test;
-
-	test = test.GetInverse();
+	//--------Zanix Engine--------	
 
 	system("PAUSE");
   

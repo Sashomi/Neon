@@ -16,8 +16,6 @@ namespace Zx
 
 		virtual ~ZException() noexcept = default;
 
-		virtual ZString GetMessage();
-
 	protected :
 		ZString m_message;
 	};
@@ -30,7 +28,7 @@ namespace Zx
 	/*
 	@Note : If the condition is true, then this is throw an exception
 	*/
-	#define ZAssert(condition, message) if ((condition)) \
+	#define ZAssert(condition, message) if (!(condition)) \
 			throw ZAssertException(__FILE__, __LINE__, message)
 
 	struct ZOperationFailed : public ZException

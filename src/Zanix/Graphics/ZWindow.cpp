@@ -35,7 +35,7 @@ namespace Zx
 	*/
 	void ZWindow::DestroyWindow()
 	{
-		ZAssert(!IsOpen(), "You can't close a closed window");
+		ZAssert(IsOpen(), "You can't close a closed window");
 		glfwDestroyWindow(m_window);
 		glfwTerminate();
 		m_open = false;
@@ -68,7 +68,7 @@ namespace Zx
 	*/
 	void ZWindow::SetWindowSize(int width, int height)
 	{
-		ZAssert(!IsOpen(), "You can't resize a closed window");
+		ZAssert(IsOpen(), "You can't resize a closed window");
 		m_width = width;
 		m_height = height;
 		glfwSetWindowSize(m_window, width, height);
@@ -92,7 +92,7 @@ namespace Zx
 	*/
 	void ZWindow::SetWindowTitle(const ZString& title)
 	{
-		ZAssert(!IsOpen(), "You can't change the title of a closed window");
+		ZAssert(IsOpen(), "You can't change the title of a closed window");
 		m_title = title;
 		glfwSetWindowTitle(m_window, m_title.GetPtr());
 	}

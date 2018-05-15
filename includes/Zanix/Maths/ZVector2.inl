@@ -143,7 +143,7 @@ namespace Zx
 	template <typename T>
 	ZVector2<T> ZVector2<T>::operator/(T v) const
 	{	
-		ZAssert(v == 0, "Division by zero");
+		ZAssert(v != 0, "Division by zero");
 		return (ZVector2<T>(x / v, y / v));
 	}
 

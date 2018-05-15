@@ -153,7 +153,7 @@ namespace Zx
 	 */
 	void ZString::Replace(const char* string, std::size_t begin)
 	{
-		ZAssert(begin > GetSize() - 1, "The beginning of the replacement is overflowing");
+		ZAssert(begin <= GetSize() - 1, "The beginning of the replacement is overflowing");
 
 		auto buffer = std::make_shared<ZString>(*this);
 
