@@ -4,7 +4,7 @@
 namespace Zx
 {
 	template <typename T>
-	ZPluginPlatform<T>::ZPluginPlatform() : m_load(false), m_library(nullptr)
+	ZPluginPlatform<T>::ZPluginPlatform() : m_library(nullptr)
 	{
 	}
 
@@ -12,7 +12,6 @@ namespace Zx
 	T* ZPluginPlatform<T>::LoadPlugin(const ZString& pluginName)
 	{
 		m_library = LoadLibrary(pluginName.GetPtr());
-		m_load = true;
 
 		if (!m_library)
 		{
@@ -30,14 +29,14 @@ namespace Zx
 	template <typename T>
 	void ZPluginPlatform<T>::UnloadPlugin()
 	{
-		if (m_load)
+		if (IsLoad())
 			FreeLibrary(m_library);
 	}
 
 	template <typename T>
 	bool ZPluginPlatform<T>::IsLoad()
 	{
-		return m_load;
+		return (m_library);
 	}
 
 }

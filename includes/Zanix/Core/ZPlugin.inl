@@ -28,5 +28,11 @@ namespace Zx
 	}
 
 	template <typename T>
+	bool ZPlugin<T>::IsLoad()
+	{
+		return (m_platform->IsLoad());
+	}
+
+	template <typename T>
 	std::shared_ptr<ZPluginPlatform<T>> ZPlugin<T>::m_platform(new ZPluginPlatform<T>);
 }

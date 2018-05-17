@@ -4,6 +4,8 @@
 #define ZWINDOW_HPP
 
 #include <iostream>
+
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include <Zanix/Core/ZString.hpp>

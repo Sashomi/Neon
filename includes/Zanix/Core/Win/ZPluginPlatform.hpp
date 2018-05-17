@@ -21,8 +21,6 @@ namespace Zx
 
 		bool IsLoad();
 	private :
-
-		bool m_load;
 		HMODULE m_library;
 	};
 }

@@ -25,6 +25,8 @@ namespace Zx
 		static T* LoadPlugin(const ZString& pluginName);
 		static void UnloadPlugin();
 
+		static bool IsLoad();
+
 	private :
 		static std::shared_ptr<ZPluginPlatform<T>> m_platform;
 	};
