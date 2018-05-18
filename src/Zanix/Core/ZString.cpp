@@ -106,7 +106,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Inserts a "C" string into a ZString
+	  @brief : Inserts a "C" string into this ZString
 	  @param : The string to insert
 	  @param : The position where it should be inserted
 	 */
@@ -126,7 +126,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Inserts a character into a ZString
+	  @brief : Inserts a character into this ZString
 	  @param : The character to insert
 	  @param : The position where it should be inserted
 	 */
@@ -136,7 +136,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Inserts a ZString into a ZString
+	  @brief : Inserts a ZString into this ZString
 	  @param : A constant reference to the ZString to insert
 	  @param : The position where it should be inserted
 	 */
@@ -146,8 +146,18 @@ namespace Zx
 	}
 
 	/*
+	  @brief : Inserts a std::string into this ZString
+	  @param : A constant reference to the std::string to insert
+	  @param : The position where it should be inserted
+	*/
+	void ZString::Insert(const std::string& string, std::size_t pos)
+	{
+		Insert(string.c_str(), pos);
+	}
+
+	/*
 	  @brief : Replaces a ZString by a "C" string
-	  @param : The "C" string to replace
+	  @param : The new "C" string
 	  @param : The position to begin the replace
 	  @Note : An exception is throw if begin is superior to the size of ZString - 1
 	 */
@@ -164,7 +174,7 @@ namespace Zx
 
 	/*
 	 @brief : Replaces a ZString by a ZString
-	 @param : The ZString to replace
+	 @param : The new ZString
 	 @param : The position to begin the replace
 	 @Note :An exception is throw if begin is superior to the size of ZString - 1
 	*/
@@ -174,10 +184,10 @@ namespace Zx
 	}
 
 	/*
-	 @brief : Replaces a ZString by a character
-	 @param : The character to replace
-	 @param : The position to begin the replace
-	 @Note : An exception is throw if begin is superior to the size of ZString - 1
+	  @brief : Replaces a ZString by a character
+	  @param : The new character
+	  @param : The position to begin the replace
+	  @Note : An exception is throw if begin is superior to the size of ZString - 1
 	*/
 	void ZString::Replace(char character, std::size_t begin)
 	{
@@ -185,7 +195,18 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Returns true if the "C" string is contain into ZString, false otherwise
+	  @brief : Replaces a ZString by a std::string
+	  @param : The new std::string
+	  @param : The position to begin the replace
+	  @Note : An exception is throw if begin is superior to the size of ZString - 1
+	*/
+	void ZString::Replace(std::string string, std::size_t begin)
+	{
+		Replace(string.c_str(), begin);
+	}
+
+	/*
+	  @brief : Returns true if the "C" string is contain into this ZString, false otherwise
 	  @param : The "C" string to search
 	  @param : A pointer to where to start the search
 	 */
@@ -213,7 +234,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Returns true if the character is contain into ZString, false otherwise
+	  @brief : Returns true if the character is contain into this ZString, false otherwise
 	  @param : The character to search
 	  @param : A pointer to where to start the search
 	 */
@@ -231,13 +252,23 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Returns true if the ZString is contain into ZString, false otherwise
+	  @brief : Returns true if the ZString is contain into this ZString, false otherwise
 	  @param : A constant reference to the ZString to search
 	  @param : A pointer to where to start the search
 	 */
 	bool ZString::Search(const ZString& string, std::size_t* pos) const
 	{
 		return (Search(string.GetPtr(), pos));
+	}
+
+	/*
+	  @brief : Returns true if the std::string is contain into this ZString, false otherwise
+	  @param : A constant reference to the std::string to search
+	  @param : A pointer to where to start the search
+	*/
+	bool ZString::Search(const std::string& string, std::size_t* pos) const
+	{
+		return (Search(string.c_str(), pos));
 	}
 
 	/*
@@ -320,7 +351,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Affects a ZString to the current object
+	  @brief : Affects a ZString to this ZString
 	  @param : A constant reference to the ZString to copy
 	*/
 	ZString& ZString::operator=(const ZString& string)
@@ -337,7 +368,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Affects a "C" string to the current object
+	  @brief : Affects a "C" string to this ZString
 	  @param : The "C" string to copy
 	*/
 	ZString& ZString::operator=(const char* string)
@@ -349,7 +380,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Moves the ZString to the current object
+	  @brief : Moves the ZString to this ZString
 	  @param : The ZString to move
 	*/
 	ZString& ZString::operator=(ZString&& string)
@@ -357,6 +388,18 @@ namespace Zx
 		int size = string.GetSize();
 		m_string = std::make_shared<String>(string.GetSize());
 		std::swap(m_string, string.m_string);
+
+		return (*this);
+	}
+
+	/*
+	@brief : Affects a std::string to this ZString
+	@param : The std::string to copy
+	*/
+	ZString& ZString::operator=(const std::string& string)
+	{
+		m_string = std::make_shared<String>(string.size());
+		std::memcpy(GetPtr(), string.c_str(), string.size());
 
 		return (*this);
 	}
@@ -398,7 +441,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Adds a character to the current object
+	  @brief : Adds a character to this ZString
 	  @param : The character to add
 	*/
 	ZString ZString::operator+(char character) const
@@ -413,7 +456,22 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Adds a ZString to the current object (macro)
+	@brief : Adds a std::string to this ZString
+	@param : The std::string to add
+	*/
+	ZString ZString::operator+(std::string string) const
+	{
+		if (GetSize() == 0)
+			return ZString(string);
+
+		ZString s(*this);
+		s.Insert(string, GetSize());
+
+		return (s);
+	}
+
+	/*
+	  @brief : Adds a ZString to this ZString (macro)
 	  @param : A constant reference to the ZString to add
 	*/
 	ZString& ZString::operator+=(const ZString& string)
@@ -424,7 +482,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Adds a "C" string to the current object (macro)
+	  @brief : Adds a "C" string to this ZString (macro)
 	  @param : The "C" string to add
 	*/
 	ZString& ZString::operator+=(const char* string)
@@ -435,12 +493,23 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Adds a character to the current object (macro)
+	  @brief : Adds a character to this ZString (macro)
 	  @param : The character to add
 	*/
 	ZString& ZString::operator+=(char character)
 	{
 		std::memcpy(&m_string->str[GetSize()], &character, std::strlen(&character));
+
+		return (*this);
+	}
+
+	/*
+	@brief : Adds a std::string to this ZString (macro)
+	@param : The std::string to add
+	*/
+	ZString& ZString::operator+=(const std::string& string)
+	{
+		std::memcpy(&m_string->str[GetSize()], string.c_str(), string.size());
 
 		return (*this);
 	}
@@ -473,6 +542,15 @@ namespace Zx
 	}
 
 	/*
+      @brief : Returns true if this ZString is equal to a std::string
+	  @param : The std::string to compare
+	*/
+	bool ZString::operator==(std::string string) const
+	{
+		return (std::strcmp(GetPtr(), string.c_str()) == 0);
+	}
+
+	/*
 	  @brief : Returns true if the "C" string is not equal to the current object, false otherwise
 	  @param : The "C" string to compare
 	*/
@@ -497,5 +575,14 @@ namespace Zx
 	bool ZString::operator!=(char character) const
 	{
 		return (m_string->str[0] != character);
+	}
+
+	/*
+	@brief : Returns true if the std::string is not equal to this ZString, false otherwise
+	@param : The std::string to compare
+	*/
+	bool ZString::operator!=(const std::string& string) const
+	{
+		return (std::strcmp(GetPtr(), string.c_str()) == 0);
 	}
 }

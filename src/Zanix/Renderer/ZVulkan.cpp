@@ -1,8 +1,10 @@
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 #include <Zanix/Core/ZException.hpp>
 #include <Zanix/Renderer/ZVulkan.hpp>
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+
 
 namespace Zx
 {
@@ -42,7 +44,7 @@ namespace Zx
 	/*
 	@brief : Destroy ZVulkan API
 	*/
-	void ZVulkan::Destroy()
+	void ZVulkan::UnInitialize()
 	{
 		vkDestroyInstance(m_instance, nullptr);
 	}
@@ -64,6 +66,43 @@ namespace Zx
 		ZAssert(IsInitialize(), "Vulkan api not initiallize");
 			
 		return (m_instance);
+	}
+
+	/*
+	@brief : Returns true if all the extensions return by "glfwGetRequiredInstanceExtensions" are supported, false otherwise
+	*/
+	bool ZVulkan::IsExtensionsSupported()
+	{
+		uint32_t extensionCount = 0;
+
+		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+		std::vector<VkExtensionProperties> extensions(extensionCount);
+		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
+
+		std::vector<ZString> requireExtensions = GetRequiredExtensions();
+
+		for (ZString require : requireExtensions)
+		{
+			for (const auto& extension : extensions) 
+			{
+				if (require == extension.extensionName)
+					return false;
+			}
+		}
+
+		return true;
+	}
+
+	//Private function
+	std::vector<ZString> ZVulkan::GetRequiredExtensions()
+	{
+		uint32_t extensionsCount = 0;
+		const char** glfwExtensions;
+		glfwExtensions = glfwGetRequiredInstanceExtensions(&extensionsCount);
+
+		std::vector<ZString> requireExtensions(glfwExtensions, glfwExtensions + extensionsCount);
+
+		return requireExtensions;
 	}
 
 	VkInstance ZVulkan::m_instance = nullptr;

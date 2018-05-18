@@ -33,14 +33,17 @@ namespace Zx
 		void Insert(const char*, std::size_t pos);
 		void Insert(char, std::size_t pos);
 		void Insert(const ZString&, std::size_t pos);
+		void Insert(const std::string&, std::size_t pos);
 
 		void Replace(const char*, std::size_t begin);
 		void Replace(const ZString&, std::size_t begin);
 		void Replace(char, std::size_t begin);
+		void Replace(std::string, std::size_t begin);
 
 		bool Search(const char*, std::size_t* pos) const;
 		bool Search(char character, std::size_t* pos) const;
 		bool Search(const ZString&, std::size_t* pos) const;
+		bool Search(const std::string&, std::size_t* pos) const;
 
 		void Clear();
 
@@ -49,22 +52,27 @@ namespace Zx
 		ZString operator+(const ZString&) const;
 		ZString operator+(const char*) const;
 		ZString operator+(char) const;
+		ZString operator+(std::string) const;
 
 		ZString& operator=(const ZString&);
 		ZString& operator=(const char*);
 		ZString& operator=(ZString&&);
+		ZString& operator=(const std::string&);
 
 		ZString& operator+=(const ZString&);
 		ZString& operator+=(const char*);
 		ZString& operator+=(char);
+		ZString& operator+=(const std::string&);
 
 		bool operator==(const char*) const;
 		bool operator==(const ZString&) const;
 		bool operator==(char) const;
+		bool operator==(std::string) const;
 
 		bool operator!=(const char*) const;
 		bool operator!=(const ZString&) const;
 		bool operator!=(char) const;
+		bool operator!=(const std::string&) const;
 
 		static char ToUpper(char);
 		static ZString ToUpper(const ZString&);

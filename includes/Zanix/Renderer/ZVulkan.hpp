@@ -3,6 +3,7 @@
 #ifndef ZVULKAN_HPP
 #define ZVULKAN_HPP
 
+#include <vector>
 #include <vulkan/vulkan.h>
 
 namespace Zx
@@ -14,13 +15,17 @@ namespace Zx
 		~ZVulkan() = delete;
 
 		static void Initialize(const ZString& applicationName);
-		static void Destroy();
+		static void UnInitialize();
 
 		static bool IsInitialize();
+		static bool IsExtensionsSupported();
+
 		static VkInstance GetVulkanInstance();
 
 		static void BeginScene();
 	private :
+		static std::vector<ZString> GetRequiredExtensions();
+
 		static VkInstance m_instance;
 	};
 }
