@@ -22,7 +22,7 @@ namespace Zx
 
 		bool IsOpen();
 
-		void CreateWindow(int width, int height, const ZString& title);
+		void CreateZWindow(int width, int height, const ZString& title);
 		void CloseWindow();
 
 		void SetWindowTitle(const ZString& title);

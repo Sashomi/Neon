@@ -83,6 +83,8 @@ namespace Zx
 	private:
 		struct String;
 
+		void PutZString(const char*, std::size_t);
+
 		std::shared_ptr<String> m_string;
 
 		struct String {

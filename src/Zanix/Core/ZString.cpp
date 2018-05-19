@@ -20,8 +20,7 @@ namespace Zx
 	{
 		if (string)
 		{
-			m_string = std::make_shared<String>(std::strlen(string));
-			std::memcpy(GetPtr(), string, std::strlen(string));
+			PutZString(string, strlen(string));
 		}
 	}
 
@@ -41,8 +40,7 @@ namespace Zx
 	 */
 	ZString::ZString(const ZString& string)
 	{
-		m_string = std::make_shared<String>(string.GetSize());
-		std::memcpy(GetPtr(), string.GetPtr(), string.GetSize());
+		PutZString(string.GetPtr(), string.GetSize());
 	}
 
 	/*
@@ -51,8 +49,7 @@ namespace Zx
 	*/
 	ZString::ZString(const std::string& string)
 	{
-		m_string = std::make_shared<String>(string.size());
-		std::memcpy(GetPtr(), string.c_str(), string.size());
+		PutZString(string.c_str(), string.size());
 	}
 
 	/*
@@ -358,8 +355,7 @@ namespace Zx
 	{
 		if (!m_string)
 		{
-			m_string = std::make_shared<String>(string.GetSize());
-			std::memcpy(GetPtr(), string.GetPtr(), string.GetSize());
+			PutZString(string.GetPtr(), string.GetSize());
 		}
 		else
 			m_string = string.m_string;
@@ -373,8 +369,7 @@ namespace Zx
 	*/
 	ZString& ZString::operator=(const char* string)
 	{
-		m_string = std::make_shared<String>(std::strlen(string));
-		std::memcpy(GetPtr(), string, std::strlen(string));
+		PutZString(string, std::strlen(string));
 
 		return (*this);
 	}
@@ -398,8 +393,7 @@ namespace Zx
 	*/
 	ZString& ZString::operator=(const std::string& string)
 	{
-		m_string = std::make_shared<String>(string.size());
-		std::memcpy(GetPtr(), string.c_str(), string.size());
+		PutZString(string.c_str(), string.size());
 
 		return (*this);
 	}
@@ -584,5 +578,12 @@ namespace Zx
 	bool ZString::operator!=(const std::string& string) const
 	{
 		return (std::strcmp(GetPtr(), string.c_str()) == 0);
+	}
+
+	//Private method
+	void ZString::PutZString(const char* string, std::size_t size)
+	{
+		m_string = std::make_shared<String>(size);
+		std::memcpy(GetPtr(), string, size);
 	}
 }

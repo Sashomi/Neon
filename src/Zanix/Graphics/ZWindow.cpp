@@ -15,7 +15,7 @@ namespace Zx
 	@param : The height of the window
 	@param : A constant reference to the title of the window
 	*/
-	void ZWindow::CreateWindow(int width, int height, const ZString& title)
+	void ZWindow::CreateZWindow(int width, int height, const ZString& title)
 	{
 		m_width = width;
 		m_height = height;
@@ -24,6 +24,8 @@ namespace Zx
 		glfwInit();
 		
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
 		m_window = glfwCreateWindow(m_width, m_height, title.GetPtr(), nullptr, nullptr);
 
 		m_open = true;

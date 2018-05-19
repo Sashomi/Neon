@@ -1,7 +1,7 @@
 #include <Zanix/Core/ZString.hpp>
 
 #ifdef ZANIX_WINDOWS
-#include <Zanix/Core/Win/ZPluginPlatform.hpp>
+	#include <Zanix/Core/Win/ZPluginPlatform.hpp>
 #endif
 
 namespace Zx
