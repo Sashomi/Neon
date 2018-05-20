@@ -7,18 +7,15 @@
 #include <Zanix/Core/ZException.hpp>
 #include <Zanix/Graphics/ZWindow.hpp>
 #include <Zanix/Renderer/ZVulkan.hpp>
-
-
+#include <Zanix/Component/ZDevice.hpp>
 
 using namespace Zx;
 
 int main(void) 
 {
 	//--------Zanix Engine--------	
-	
+
 	ZVulkan::Initialize("Zanix");
-	ZVulkan::SetupDebugCallback();
-	ZVulkan::UnInitialize();
 
 	system("PAUSE");
   

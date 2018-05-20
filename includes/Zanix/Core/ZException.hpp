@@ -28,8 +28,10 @@ namespace Zx
 	/*
 	@Note : If the condition is true, then this is throw an exception
 	*/
-	#define ZAssert(condition, message) if (!(condition)) \
-			throw ZAssertException(__FILE__, __LINE__, message)
+	#ifndef NDEBUG
+		#define ZAssert(condition, message) if (!(condition)) \
+				throw ZAssertException(__FILE__, __LINE__, message)
+	#endif
 
 	struct ZOperationFailed : public ZException
 	{

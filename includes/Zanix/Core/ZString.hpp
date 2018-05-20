@@ -87,7 +87,8 @@ namespace Zx
 
 		std::shared_ptr<String> m_string;
 
-		struct String {
+		struct String 
+		{
 			inline String(std::size_t);
 
 			std::size_t size;

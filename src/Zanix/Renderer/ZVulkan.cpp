@@ -1,12 +1,13 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include <Zanix/Component/ZDevice.hpp>
 #include <Zanix/Core/ZException.hpp>
 #include <Zanix/Renderer/ZVulkan.hpp>
 
 namespace Zx
 {
-	const std::vector<const char*> validationLayers =
+	const std::vector<const char*> ZVulkan::m_validationLayers =
 	{
 		"VK_LAYER_LUNARG_standard_validation"
 	};
@@ -17,38 +18,10 @@ namespace Zx
 	*/
 	void ZVulkan::Initialize(const ZString& applicationName)
 	{
-		#ifndef NDEBUG
-		if (!IsLayersSupported())
-			throw ZOperationFailed(__FILE__, "Validations layers require");
-		#endif
-
-		VkApplicationInfo appInfo = {};
-		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = applicationName.GetPtr();
-		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.pEngineName = "Zanix Engine";
-		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.apiVersion = VK_API_VERSION_1_1;
-
-		VkInstanceCreateInfo createInfo = {};
-		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-		createInfo.pApplicationInfo = &appInfo;
-
-		auto extensions = GetRequiredExtensions();
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-		createInfo.ppEnabledExtensionNames = extensions.data();
-
-		#ifndef NDEBUG
-			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-			createInfo.ppEnabledLayerNames = validationLayers.data();
-		#else
-			createInfo.enabledLayerCount = 0;
-		#endif
-
-		if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
-		{
-			throw ZOperationFailed(__FILE__, "Failed to create Vulkan instance");
-		}
+		CreateInstance(applicationName);
+		SetupDebugCallback();
+		ZDevice::FoundPhysicalDevice();
+		ZDevice::CreateLogicalDevice();
 	}
 
 	/*
@@ -56,9 +29,11 @@ namespace Zx
 	*/
 	void ZVulkan::UnInitialize()
 	{
-	#ifndef NDEBUG
-		DestroyDebugReportCallbackEXT(m_instance, m_callback, nullptr);
-	#endif
+		vkDestroyDevice(ZDevice::GetLogicalDevice(), nullptr);
+
+		#ifndef NDEBUG
+			DestroyDebugReportCallbackEXT(m_instance, m_callback, nullptr);
+		#endif
 
 		vkDestroyInstance(m_instance, nullptr);
 	}
@@ -119,7 +94,7 @@ namespace Zx
 		std::vector<VkLayerProperties> layers(layerCount);
 		vkEnumerateInstanceLayerProperties(&layerCount, layers.data());
 
-		for (const char* layerName : validationLayers)
+		for (const char* layerName : m_validationLayers)
 		{
 			for (const auto& layer : layers)
 			{
@@ -154,7 +129,53 @@ namespace Zx
 		}
 	}
 
+	/*
+	@brief : Returns the validation layers
+	*/
+	const std::vector<const char*>& ZVulkan::GetValidationsLayers()
+	{
+		return m_validationLayers;
+	}
+
 	//-------------------------Private method-------------------------
+	void ZVulkan::CreateInstance(const ZString& applicationName)
+	{
+		#ifndef NDEBUG
+				if (!IsLayersSupported())
+					throw ZOperationFailed(__FILE__, "Validations layers require");
+		#endif
+
+		//Application information
+		VkApplicationInfo appInfo = {};
+		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+		appInfo.pApplicationName = applicationName.GetPtr();
+		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+		appInfo.pEngineName = "Zanix Engine";
+		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+		appInfo.apiVersion = VK_API_VERSION_1_1;
+
+		//Instance information
+		VkInstanceCreateInfo createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+		createInfo.pApplicationInfo = &appInfo;
+
+		auto extensions = GetRequiredExtensions();
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+		createInfo.ppEnabledExtensionNames = extensions.data();
+
+		#ifndef NDEBUG
+				createInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
+				createInfo.ppEnabledLayerNames = m_validationLayers.data();
+		#else
+				createInfo.enabledLayerCount = 0;
+		#endif
+
+		if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
+		{
+			throw ZOperationFailed(__FILE__, "Failed to create Vulkan instance");
+		}
+	}
+
 	std::vector<const char*> ZVulkan::GetRequiredExtensions()
 	{
 		uint32_t extensionsCount = 0;
