@@ -10,10 +10,11 @@ namespace Zx
 	public:
 		struct Queue
 		{
-			int index = -1;
+			int indexFamily = -1;
+			int presentFamily = -1;
+
 			inline bool IsValidQueue();
 		};
-
 
 		ZDevice() = default;
 		~ZDevice() = delete;
@@ -32,6 +33,7 @@ namespace Zx
 		static VkPhysicalDevice m_physicalDevice;
 		static VkDevice m_logicalDevice;
 		static VkQueue m_graphicsQueue;
+		static VkQueue m_presentQueue;
 	};
 }
 

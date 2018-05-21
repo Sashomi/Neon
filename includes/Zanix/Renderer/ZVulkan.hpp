@@ -9,6 +9,7 @@
 namespace Zx
 {
 	class ZString;
+	class ZWindow;
 
 	class ZVulkan
 	{
@@ -16,7 +17,7 @@ namespace Zx
 		ZVulkan() = default;
 		~ZVulkan() = delete;
 
-		static void Initialize(const ZString& applicationName);
+		static void Initialize(const ZWindow&);
 		static void UnInitialize();
 
 		static bool IsInitialize();
@@ -24,6 +25,7 @@ namespace Zx
 		static bool IsLayersSupported();
 
 		static VkInstance GetVulkanInstance();
+		static VkSurfaceKHR GetWindowSurface();
 
 		static const std::vector<const char*>& GetValidationsLayers();
 		
@@ -31,11 +33,14 @@ namespace Zx
 		//Attributes
 		static VkInstance m_instance;
 		static VkDebugReportCallbackEXT m_callback;
+		static ZWindow m_window;
+		static VkSurfaceKHR m_surface;
 		static const std::vector<const char*> m_validationLayers;
 
 
 		//Private methods
 		static void CreateInstance(const ZString&);
+		static void CreateWindowSurface();
 		static void SetupDebugCallback();
 		static std::vector<const char*> GetRequiredExtensions();
 

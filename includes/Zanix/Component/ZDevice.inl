@@ -2,6 +2,7 @@ namespace Zx
 {
 	bool ZDevice::Queue::IsValidQueue()
 	{
-		return (index >= 0);
+		//TODO : Opti
+		return (indexFamily >= 0);
 	}
 }

@@ -8,7 +8,6 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include <Zanix/Core/ZString.hpp>
 #include <Zanix/Core/ZException.hpp>
 
 namespace Zx
@@ -17,10 +16,10 @@ namespace Zx
 	{
 	public :
 		ZWindow();
-		ZWindow(const ZWindow&) = delete;
-		ZWindow(ZWindow&&) = delete;
+		ZWindow(const ZWindow&);
+		ZWindow(ZWindow&&);
 
-		bool IsOpen();
+		bool IsOpen() const;
 
 		void CreateZWindow(int width, int height, const ZString& title);
 		void CloseWindow();
@@ -30,6 +29,11 @@ namespace Zx
 
 		ZString GetWindowTitle() const;
 		void GetWindowSize(int *width, int *height) const;
+
+		GLFWwindow* GetWindow() const;
+
+		ZWindow& operator=(const ZWindow&);
+		ZWindow& operator=(ZWindow&&);
 
 	private :
 		void DestroyWindow();

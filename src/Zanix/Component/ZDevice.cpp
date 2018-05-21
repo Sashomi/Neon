@@ -2,13 +2,10 @@
 #include <Zanix/Core/ZException.hpp>
 #include <Zanix/Component/ZDevice.hpp>
 
+#include <set>
+
 namespace Zx
 {
-	const std::vector<const char*> test =
-	{
-		"VK_LAYER_LUNARG_standard_validation"
-	};
-
 	/*
 	@brief : Founds an appropriate physical device
 	*/
@@ -24,7 +21,7 @@ namespace Zx
 
 		std::vector<VkPhysicalDevice> devices(gpuCount);
 		vkEnumeratePhysicalDevices(ZVulkan::GetVulkanInstance(), &gpuCount, devices.data());
-
+		
 		for (const auto& device : devices)
 		{
 			if (IsPhysicalDeviceAppropriate(device))
@@ -62,20 +59,29 @@ namespace Zx
 	{
 		Queue queue = GetQueueFamiliy(m_physicalDevice);
 
-		VkDeviceQueueCreateInfo createQueueInfo = {};
-		createQueueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		createQueueInfo.queueFamilyIndex = queue.index;
-		createQueueInfo.queueCount = 1;
-		float priority = 1.0f;
-		createQueueInfo.pQueuePriorities = &priority;
+		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+		std::set<int> uniqueQueueFamilies = 
+		{ 
+			queue.indexFamily, queue.presentFamily 
+		};
+
+		float queuePriority = 1.0f;
+		for (int queueFamily : uniqueQueueFamilies) {
+			VkDeviceQueueCreateInfo queueCreateInfo = {};
+			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			queueCreateInfo.queueFamilyIndex = queueFamily;
+			queueCreateInfo.queueCount = 1;
+			queueCreateInfo.pQueuePriorities = &queuePriority;
+			queueCreateInfos.push_back(queueCreateInfo);
+		}
 
 		//On le laisse sans rien pour l'instant on précisera des options potentielles plus tard
 		VkPhysicalDeviceFeatures physicalDeviceFeatures = {};
 
 		VkDeviceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		createInfo.pQueueCreateInfos = &createQueueInfo;
-		createInfo.queueCreateInfoCount = 1;
+		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+		createInfo.pQueueCreateInfos = queueCreateInfos.data();
 
 		createInfo.pEnabledFeatures = &physicalDeviceFeatures;
 
@@ -92,8 +98,9 @@ namespace Zx
 		{
 			throw ZOperationFailed(__FILE__, "Failed to create logical device");
 		}
-
-		vkGetDeviceQueue(m_logicalDevice, queue.index, 0, &m_graphicsQueue);
+		
+		vkGetDeviceQueue(m_logicalDevice, queue.indexFamily, 0, &m_graphicsQueue);
+		vkGetDeviceQueue(m_logicalDevice, queue.presentFamily, 0, &m_presentQueue);
 	}
 
 	/*
@@ -113,11 +120,14 @@ namespace Zx
 		int i = 0;
 		for (const auto& queueFamily : queueFamilies)
 		{
-			if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-			{
-				queue.index = i;
+			VkBool32 presentSupported = false;
+			vkGetPhysicalDeviceSurfaceSupportKHR(m_physicalDevice, i, ZVulkan::GetWindowSurface(), &presentSupported);
+
+			if (queueFamily.queueCount > 0 && presentSupported)
+				queue.indexFamily = i;
+
+			if (queue.IsValidQueue())
 				break;
-			}
 
 			i++;
 		}
@@ -132,11 +142,12 @@ namespace Zx
 	bool ZDevice::IsPhysicalDeviceAppropriate(VkPhysicalDevice device)
 	{
 		Queue queue = GetQueueFamiliy(device);
-
+		
 		return queue.IsValidQueue();
 	}
-	
+
 	VkPhysicalDevice ZDevice::m_physicalDevice = VK_NULL_HANDLE;
-	VkDevice ZDevice::m_logicalDevice = nullptr;
-	VkQueue ZDevice::m_graphicsQueue = nullptr;
+	VkDevice ZDevice::m_logicalDevice = VK_NULL_HANDLE;
+	VkQueue ZDevice::m_graphicsQueue = VK_NULL_HANDLE;
+	VkQueue ZDevice::m_presentQueue = VK_NULL_HANDLE;
 }

@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <Zanix/Component/ZDevice.hpp>
+#include <Zanix/Graphics/ZWindow.hpp>
 #include <Zanix/Core/ZException.hpp>
 #include <Zanix/Renderer/ZVulkan.hpp>
 
@@ -14,12 +15,19 @@ namespace Zx
 
 	/*
 	@brief : Initialize ZVulkan API
-	@brief : The name of the application
+	@param : The name of the application
+	@note : Requires to create a ZWindow before because this is influence the device choice
 	*/
-	void ZVulkan::Initialize(const ZString& applicationName)
+	void ZVulkan::Initialize(const ZWindow& window)
 	{
-		CreateInstance(applicationName);
+		if (IsInitialize())
+			ZOperationFailed(__FILE__, "ZVulkan is already initialize");
+
+		m_window = window;
+
+		CreateInstance(window.GetWindowTitle());
 		SetupDebugCallback();
+		CreateWindowSurface();
 		ZDevice::FoundPhysicalDevice();
 		ZDevice::CreateLogicalDevice();
 	}
@@ -35,6 +43,7 @@ namespace Zx
 			DestroyDebugReportCallbackEXT(m_instance, m_callback, nullptr);
 		#endif
 
+		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
 	}
 
@@ -53,8 +62,16 @@ namespace Zx
 	VkInstance ZVulkan::GetVulkanInstance()
 	{
 		ZAssert(IsInitialize(), "Vulkan api not initiallize");
-			
+		
 		return (m_instance);
+	}
+
+	/*
+	@brief : Returns the window surface
+	*/
+	VkSurfaceKHR ZVulkan::GetWindowSurface()
+	{
+		return m_surface;
 	}
 
 	/*
@@ -109,27 +126,6 @@ namespace Zx
 	}
 
 	/*
-	@brief : Active the debug callback propose by Vulkan
-	@Note : Require the debug mode
-	*/
-	void ZVulkan::SetupDebugCallback()
-	{
-		#ifdef NDEBUG
-			return;
-		#endif
-
-		VkDebugReportCallbackCreateInfoEXT createInfo = {};
-		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-		createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
-		createInfo.pfnCallback = DebugCallback;
-
-		if (CreateDebugReportCallbackEXT(m_instance, &createInfo, nullptr, &m_callback) != VK_SUCCESS) 
-		{
-			throw ZOperationFailed(__FILE__, "Failed to set up debug callback");
-		}
-	}
-
-	/*
 	@brief : Returns the validation layers
 	*/
 	const std::vector<const char*>& ZVulkan::GetValidationsLayers()
@@ -137,7 +133,9 @@ namespace Zx
 		return m_validationLayers;
 	}
 
+
 	//-------------------------Private method-------------------------
+
 	void ZVulkan::CreateInstance(const ZString& applicationName)
 	{
 		#ifndef NDEBUG
@@ -176,6 +174,35 @@ namespace Zx
 		}
 	}
 
+	//----------------------------------------------------------------
+
+	void ZVulkan::CreateWindowSurface()
+	{
+		if (glfwCreateWindowSurface(m_instance, m_window.GetWindow(), nullptr, &m_surface) != VK_SUCCESS)
+			ZOperationFailed(__FILE__, "Failed to create window surface");
+	}
+
+	//----------------------------------------------------------------
+
+	void ZVulkan::SetupDebugCallback()
+	{
+		#ifdef NDEBUG
+				return;
+		#endif
+
+		VkDebugReportCallbackCreateInfoEXT createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+		createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
+		createInfo.pfnCallback = DebugCallback;
+
+		if (CreateDebugReportCallbackEXT(m_instance, &createInfo, nullptr, &m_callback) != VK_SUCCESS)
+		{
+			throw ZOperationFailed(__FILE__, "Failed to set up debug callback");
+		}
+	}
+
+	//----------------------------------------------------------------
+
 	std::vector<const char*> ZVulkan::GetRequiredExtensions()
 	{
 		uint32_t extensionsCount = 0;
@@ -190,6 +217,8 @@ namespace Zx
 
 		return requireExtensions;
 	}
+
+	//----------------------------------------------------------------
 
 	VkResult ZVulkan::CreateDebugReportCallbackEXT(VkInstance instance,
 		const VkDebugReportCallbackCreateInfoEXT* pCreateInfo,
@@ -208,6 +237,8 @@ namespace Zx
 		}
 	}
 
+	//----------------------------------------------------------------
+
 	void ZVulkan::DestroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator) {
 		auto func = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
 
@@ -215,6 +246,8 @@ namespace Zx
 			func(instance, callback, pAllocator);
 		}
 	}
+
+	//----------------------------------------------------------------
 
 	VKAPI_ATTR VkBool32 VKAPI_CALL ZVulkan::DebugCallback(VkDebugReportFlagsEXT flags,
 		VkDebugReportObjectTypeEXT objType,
@@ -230,6 +263,8 @@ namespace Zx
 		return VK_FALSE;
 	}
 
-	VkDebugReportCallbackEXT ZVulkan::m_callback = nullptr;
-	VkInstance ZVulkan::m_instance = nullptr;
+	VkDebugReportCallbackEXT ZVulkan::m_callback = VK_NULL_HANDLE;
+	VkInstance ZVulkan::m_instance = VK_NULL_HANDLE;
+	ZWindow ZVulkan::m_window;
+	VkSurfaceKHR ZVulkan::m_surface = VK_NULL_HANDLE;
 }

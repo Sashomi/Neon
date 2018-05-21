@@ -1,6 +1,10 @@
 #include <Zanix/Core/ZString.hpp>
 #include <Zanix/Core/ZException.hpp>
 
+#include <memory>
+#include <cstdlib>
+#include <cstring>
+
 namespace Zx
 {
 

@@ -1,3 +1,4 @@
+#include <Zanix/Renderer/ZVulkan.hpp>
 #include <Zanix/Graphics/ZWindow.hpp>
 
 namespace Zx
@@ -9,6 +10,28 @@ namespace Zx
 	{
 	}
 
+	/*
+	@brief : Copy constructor
+	@param : The ZWindow to copy
+	*/
+	ZWindow::ZWindow(const ZWindow& window) : m_open(window.m_open), m_width(window.m_width), m_height(window.m_height),
+		m_title(window.m_title), m_window(window.m_window)
+	{
+	}
+
+	/*
+	@brief : Move constructor
+	@param : The ZWindow to move
+	*/
+	ZWindow::ZWindow(ZWindow&& window) 
+	{
+		std::swap(m_open, window.m_open);
+		std::swap(m_height, window.m_height);
+		std::swap(m_width, window.m_width);
+		std::swap(m_title, window.m_title);
+		std::swap(m_window, window.m_window);
+	}
+	
 	/*
 	@brief : Creates a ZWindow
 	@param : The width of the window
@@ -38,15 +61,24 @@ namespace Zx
 	void ZWindow::DestroyWindow()
 	{
 		ZAssert(IsOpen(), "You can't close a closed window");
+
 		glfwDestroyWindow(m_window);
 		glfwTerminate();
 		m_open = false;
 	}
 
 	/*
+	@brief : Returns the window
+	*/
+	GLFWwindow* ZWindow::GetWindow() const
+	{
+		return m_window;
+	}
+	
+	/*
 	@brief : Returns true if the windows is close, false otherwise
 	*/
-	bool ZWindow::IsOpen()
+	bool ZWindow::IsOpen() const
 	{
 		glfwPollEvents();
 		return m_open;
@@ -105,5 +137,35 @@ namespace Zx
 	ZString ZWindow::GetWindowTitle() const
 	{
 		return (ZString(m_title));
+	}
+
+	/*
+	@brief : Copy a ZWindow to this ZWindow
+	@param : The ZWindow to copy
+	*/
+	ZWindow& ZWindow::operator=(const ZWindow& window)
+	{
+		m_open = window.m_open;
+		m_height = window.m_height;
+		m_width = window.m_width;
+		m_title = window.m_title;
+		m_window = window.m_window;
+
+		return (*this);
+	}
+	
+	/*
+	@brief : Move a ZWindow to this ZWindow
+	@param : The ZWindow to move
+	*/
+	ZWindow& ZWindow::operator=(ZWindow&& window)
+	{
+		std::swap(m_open, window.m_open);
+		std::swap(m_height, window.m_height);
+		std::swap(m_width, window.m_width);
+		std::swap(m_title, window.m_title);
+		std::swap(m_window, window.m_window);
+
+		return (*this);
 	}
 }
