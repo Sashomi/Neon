@@ -24,8 +24,8 @@ namespace Zx
 		static bool IsExtensionsSupported();
 		static bool IsLayersSupported();
 
-		static VkInstance GetVulkanInstance();
-		static VkSurfaceKHR GetWindowSurface();
+		static VkInstance& GetVulkanInstance();
+		static VkSurfaceKHR& GetWindowSurface();
 
 		static const std::vector<const char*>& GetValidationsLayers();
 		

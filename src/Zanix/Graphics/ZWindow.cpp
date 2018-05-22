@@ -11,6 +11,17 @@ namespace Zx
 	}
 
 	/*
+	@brief : Constructs a ZWindow
+	@param : The width of the ZWindow
+	@param : The height of the ZWindow
+	@param : The title of the ZWindow
+	*/
+	ZWindow::ZWindow(int width, int height, ZString title)
+	{
+		CreateZWindow(width, height, title);
+	}
+
+	/*
 	@brief : Copy constructor
 	@param : The ZWindow to copy
 	*/

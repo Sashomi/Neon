@@ -60,6 +60,7 @@ namespace Zx
 		Queue queue = GetQueueFamiliy(m_physicalDevice);
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+
 		std::set<int> uniqueQueueFamilies = 
 		{ 
 			queue.indexFamily, queue.presentFamily 
@@ -114,17 +115,23 @@ namespace Zx
 		uint32_t queueFamilyCount = 0;
 		
 		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
 		std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
 		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
 		int i = 0;
 		for (const auto& queueFamily : queueFamilies)
 		{
+			if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+				queue.indexFamily = i;
+			}
+			
 			VkBool32 presentSupported = false;
-			vkGetPhysicalDeviceSurfaceSupportKHR(m_physicalDevice, i, ZVulkan::GetWindowSurface(), &presentSupported);
+
+			vkGetPhysicalDeviceSurfaceSupportKHR(device, i, ZVulkan::GetWindowSurface(), &presentSupported);
 
 			if (queueFamily.queueCount > 0 && presentSupported)
-				queue.indexFamily = i;
+				queue.presentFamily = i;
 
 			if (queue.IsValidQueue())
 				break;

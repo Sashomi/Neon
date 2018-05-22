@@ -59,7 +59,7 @@ namespace Zx
 	@brief : Return the vulkan instance
 	@note : Require the vulkan API is initialize
 	*/
-	VkInstance ZVulkan::GetVulkanInstance()
+	VkInstance& ZVulkan::GetVulkanInstance()
 	{
 		ZAssert(IsInitialize(), "Vulkan api not initiallize");
 		
@@ -69,7 +69,7 @@ namespace Zx
 	/*
 	@brief : Returns the window surface
 	*/
-	VkSurfaceKHR ZVulkan::GetWindowSurface()
+	VkSurfaceKHR& ZVulkan::GetWindowSurface()
 	{
 		return m_surface;
 	}

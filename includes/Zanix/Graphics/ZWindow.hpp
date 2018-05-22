@@ -16,6 +16,7 @@ namespace Zx
 	{
 	public :
 		ZWindow();
+		ZWindow(int width, int height, ZString title);
 		ZWindow(const ZWindow&);
 		ZWindow(ZWindow&&);
 
