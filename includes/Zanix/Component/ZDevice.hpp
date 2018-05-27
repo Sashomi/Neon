@@ -26,14 +26,14 @@ namespace Zx
 
 		static VkPhysicalDevice GetPhysicalDevice();
 		static VkDevice	GetLogicalDevice();
-		
-		static bool IsPhysicalDeviceAppropriate(VkPhysicalDevice);
 
 	private :
 		static VkPhysicalDevice m_physicalDevice;
 		static VkDevice m_logicalDevice;
 		static VkQueue m_graphicsQueue;
 		static VkQueue m_presentQueue;
+
+		static int GetGPUScore(VkPhysicalDevice);
 	};
 }
 

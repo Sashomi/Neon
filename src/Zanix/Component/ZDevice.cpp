@@ -3,6 +3,7 @@
 #include <Zanix/Component/ZDevice.hpp>
 
 #include <set>
+#include <map>
 
 namespace Zx
 {
@@ -21,19 +22,27 @@ namespace Zx
 
 		std::vector<VkPhysicalDevice> devices(gpuCount);
 		vkEnumeratePhysicalDevices(ZVulkan::GetVulkanInstance(), &gpuCount, devices.data());
+
+		std::multimap<int, VkPhysicalDevice> devicesMap;
 		
 		for (const auto& device : devices)
 		{
-			if (IsPhysicalDeviceAppropriate(device))
-			{
-				m_physicalDevice = device;
-				break;
-			}
+			int score = GetGPUScore(device);
+			devicesMap.insert(std::make_pair(score, device));
 		}
+		
+		
 
-		//If no device found
-		if (m_physicalDevice == VK_NULL_HANDLE)
-			throw ZOperationFailed(__FILE__, "Failed to found an appropriate GPU");
+		//We get the best GPU
+		if (devicesMap.rbegin()->first > 0)
+			m_physicalDevice = devicesMap.rbegin()->second;
+		else
+			throw ZOperationFailed(__FILE__, "Failed to find a suitable GPU");
+
+		VkPhysicalDeviceProperties deviceProperties;
+		vkGetPhysicalDeviceProperties(m_physicalDevice, &deviceProperties);
+
+		std::cout << "GPU choisit : " << deviceProperties.deviceName << std::endl;
 	}
 
 	/*
@@ -142,15 +151,28 @@ namespace Zx
 		return queue;
 	}
 
-	/*
-	@brief : Returns true if the device is appropriate, false otherwise
-	@param : The device to test
-	*/
-	bool ZDevice::IsPhysicalDeviceAppropriate(VkPhysicalDevice device)
+	//-------------------------Private method-------------------------
+
+	int ZDevice::GetGPUScore(VkPhysicalDevice device)
 	{
-		Queue queue = GetQueueFamiliy(device);
+		int score = 0;
+		VkPhysicalDeviceProperties deviceProperties;
+		vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+		VkPhysicalDeviceFeatures deviceFeatures;
+		vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 		
-		return queue.IsValidQueue();
+		if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+			score += 1000;
+
+		score += deviceProperties.limits.maxImageDimension2D;
+		score += deviceProperties.limits.maxViewports;
+
+		// Si le GPU ne supporte pas les shaders
+		if (!(deviceFeatures.geometryShader))
+			return 0;
+
+		return score;
 	}
 
 	VkPhysicalDevice ZDevice::m_physicalDevice = VK_NULL_HANDLE;
