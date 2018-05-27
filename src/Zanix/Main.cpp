@@ -14,7 +14,7 @@ using namespace Zx;
 int main(void) 
 {
 	//--------Zanix Engine--------	
-
+	
 	ZWindow w(600, 200, "Zanix");
 	ZVulkan::Initialize(w);
 

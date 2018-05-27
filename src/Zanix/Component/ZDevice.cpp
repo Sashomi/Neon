@@ -16,9 +16,7 @@ namespace Zx
 		vkEnumeratePhysicalDevices(ZVulkan::GetVulkanInstance(), &gpuCount, nullptr);
 
 		if (gpuCount == 0)
-		{
 			throw ZOperationFailed(__FILE__, "No GPU support vulkan found");
-		}
 
 		std::vector<VkPhysicalDevice> devices(gpuCount);
 		vkEnumeratePhysicalDevices(ZVulkan::GetVulkanInstance(), &gpuCount, devices.data());
@@ -38,11 +36,6 @@ namespace Zx
 			m_physicalDevice = devicesMap.rbegin()->second;
 		else
 			throw ZOperationFailed(__FILE__, "Failed to find a suitable GPU");
-
-		VkPhysicalDeviceProperties deviceProperties;
-		vkGetPhysicalDeviceProperties(m_physicalDevice, &deviceProperties);
-
-		std::cout << "GPU choisit : " << deviceProperties.deviceName << std::endl;
 	}
 
 	/*
@@ -97,7 +90,7 @@ namespace Zx
 
 		createInfo.enabledExtensionCount = 0;
 
-		#ifndef NDEBUG
+		#ifndef ZDEBUG
 				createInfo.enabledLayerCount = static_cast<uint32_t>(ZVulkan::GetValidationsLayers().size());
 				createInfo.ppEnabledLayerNames = ZVulkan::GetValidationsLayers().data();
 		#else
@@ -105,9 +98,7 @@ namespace Zx
 		#endif
 
 		if (vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_logicalDevice) != VK_SUCCESS)
-		{
 			throw ZOperationFailed(__FILE__, "Failed to create logical device");
-		}
 		
 		vkGetDeviceQueue(m_logicalDevice, queue.indexFamily, 0, &m_graphicsQueue);
 		vkGetDeviceQueue(m_logicalDevice, queue.presentFamily, 0, &m_presentQueue);
@@ -131,9 +122,8 @@ namespace Zx
 		int i = 0;
 		for (const auto& queueFamily : queueFamilies)
 		{
-			if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+			if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 				queue.indexFamily = i;
-			}
 			
 			VkBool32 presentSupported = false;
 

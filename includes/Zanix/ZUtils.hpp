@@ -1,6 +1,10 @@
 #ifndef ZUTILS_HPP
 #define ZUTILS_HPP
 
+#if defined NDEBUG
+	#define ZDEBUG
+#endif
+
 #if defined (_WIN32)
 	#define ZANIX_WINDOWS
 

@@ -39,9 +39,7 @@ namespace Zx
 	{
 		vkDestroyDevice(ZDevice::GetLogicalDevice(), nullptr);
 
-		#ifndef NDEBUG
-			DestroyDebugReportCallbackEXT(m_instance, m_callback, nullptr);
-		#endif
+		DestroyDebugReportCallbackEXT(m_instance, m_callback, nullptr);
 
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
@@ -88,13 +86,9 @@ namespace Zx
 		std::vector<const char*> requireExtensions = GetRequiredExtensions();
 
 		for (const char* require : requireExtensions)
-		{
 			for (const auto& extension : extensions) 
-			{
 				if (std::strcmp(require, extension.extensionName) == 0)
 					return true;
-			}
-		}
 
 		return false;
 	}
@@ -112,15 +106,9 @@ namespace Zx
 		vkEnumerateInstanceLayerProperties(&layerCount, layers.data());
 
 		for (const char* layerName : m_validationLayers)
-		{
 			for (const auto& layer : layers)
-			{
 				if (std::strcmp(layerName, layer.layerName) == 0)
-				{
 					return true;
-				}
-			}
-		}
 
 		return false;
 	}
@@ -138,7 +126,7 @@ namespace Zx
 
 	void ZVulkan::CreateInstance(const ZString& applicationName)
 	{
-		#ifndef NDEBUG
+		#ifndef ZDEBUG
 				if (!IsLayersSupported())
 					throw ZOperationFailed(__FILE__, "Validations layers require");
 		#endif
@@ -161,7 +149,7 @@ namespace Zx
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
 		createInfo.ppEnabledExtensionNames = extensions.data();
 
-		#ifndef NDEBUG
+		#ifndef ZDEBUG
 				createInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
 				createInfo.ppEnabledLayerNames = m_validationLayers.data();
 		#else
@@ -169,9 +157,7 @@ namespace Zx
 		#endif
 
 		if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
-		{
 			throw ZOperationFailed(__FILE__, "Failed to create Vulkan instance");
-		}
 	}
 
 	//----------------------------------------------------------------
@@ -186,7 +172,7 @@ namespace Zx
 
 	void ZVulkan::SetupDebugCallback()
 	{
-		#ifdef NDEBUG
+		#ifdef ZDEBUG
 				return;
 		#endif
 
@@ -196,9 +182,7 @@ namespace Zx
 		createInfo.pfnCallback = DebugCallback;
 
 		if (CreateDebugReportCallbackEXT(m_instance, &createInfo, nullptr, &m_callback) != VK_SUCCESS)
-		{
 			throw ZOperationFailed(__FILE__, "Failed to set up debug callback");
-		}
 	}
 
 	//----------------------------------------------------------------
@@ -211,7 +195,7 @@ namespace Zx
 
 		std::vector<const char*> requireExtensions(glfwExtensions, glfwExtensions + extensionsCount);
 
-		#ifndef NDEBUG
+		#ifndef ZDEBUG
 			requireExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 		#endif
 
@@ -227,19 +211,20 @@ namespace Zx
 	{
 		auto func = (PFN_vkCreateDebugReportCallbackEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
 
-		if (func != nullptr) 
-		{
+		if (func) 
 			return func(instance, pCreateInfo, pAllocator, pCallback);
-		}
 		else 
-		{
 			return VK_ERROR_EXTENSION_NOT_PRESENT;
-		}
 	}
 
 	//----------------------------------------------------------------
 
-	void ZVulkan::DestroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator) {
+	void ZVulkan::DestroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator) 
+	{
+		#ifdef ZDEBUG
+			return;
+		#endif
+
 		auto func = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
 
 		if (func != nullptr) {
