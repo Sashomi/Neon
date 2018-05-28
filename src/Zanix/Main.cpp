@@ -1,6 +1,6 @@
 #include <iostream>
-
 #include <vector>
+#include <map>
 
 #include <Zanix/Core/ZPlugin.hpp>
 #include <Zanix/Core/ZString.hpp>
@@ -14,12 +14,8 @@ using namespace Zx;
 int main(void) 
 {
 	//--------Zanix Engine--------	
-	
-	ZWindow w(600, 200, "Zanix");
-	ZVulkan::Initialize(w);
 
-	ZVulkan::UnInitialize();
-	w.CloseWindow();
+	
 
 	system("PAUSE");
   

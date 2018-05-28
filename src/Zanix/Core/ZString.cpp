@@ -1,5 +1,5 @@
 #include <Zanix/Core/ZString.hpp>
-#include <Zanix/Core/ZException.hpp>
+#include <Zanix/ZUtils.hpp>
 
 #include <memory>
 #include <cstdlib>

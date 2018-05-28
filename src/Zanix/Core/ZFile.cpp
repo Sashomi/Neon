@@ -1,5 +1,4 @@
-#pragma once
-
+#include <Zanix/ZUtils.hpp>
 #include <Zanix/Core/ZFile.hpp>
 
 namespace Zx 

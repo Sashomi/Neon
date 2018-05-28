@@ -1,5 +1,5 @@
 #include <Zanix/Renderer/ZVulkan.hpp>
-#include <Zanix/Core/ZException.hpp>
+#include <Zanix/ZUtils.hpp>
 #include <Zanix/Component/ZDevice.hpp>
 
 #include <set>
@@ -28,8 +28,6 @@ namespace Zx
 			int score = GetGPUScore(device);
 			devicesMap.insert(std::make_pair(score, device));
 		}
-		
-		
 
 		//We get the best GPU
 		if (devicesMap.rbegin()->first > 0)
@@ -145,6 +143,11 @@ namespace Zx
 
 	int ZDevice::GetGPUScore(VkPhysicalDevice device)
 	{
+		Queue queue = GetQueueFamiliy(device);
+
+		if (!queue.IsValidQueue())
+			return 0;
+		
 		int score = 0;
 		VkPhysicalDeviceProperties deviceProperties;
 		vkGetPhysicalDeviceProperties(device, &deviceProperties);

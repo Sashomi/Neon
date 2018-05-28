@@ -1,6 +1,8 @@
 #ifndef ZUTILS_HPP
 #define ZUTILS_HPP
 
+#include <Zanix/Core/ZException.hpp>
+
 #if defined NDEBUG
 	#define ZDEBUG
 #endif

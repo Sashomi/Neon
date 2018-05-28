@@ -7,9 +7,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 
-
-#include <Zanix/Core/ZException.hpp>
-
 namespace Zx 
 {
 	class ZFile 

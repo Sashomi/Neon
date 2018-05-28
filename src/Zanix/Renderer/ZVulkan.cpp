@@ -3,7 +3,7 @@
 
 #include <Zanix/Component/ZDevice.hpp>
 #include <Zanix/Graphics/ZWindow.hpp>
-#include <Zanix/Core/ZException.hpp>
+#include <Zanix/ZUtils.hpp>
 #include <Zanix/Renderer/ZVulkan.hpp>
 
 namespace Zx
