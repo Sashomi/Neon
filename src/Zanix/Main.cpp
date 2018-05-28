@@ -15,7 +15,11 @@ int main(void)
 {
 	//--------Zanix Engine--------	
 
-	
+	ZWindow w(1200, 600, "Zanix");
+	ZVulkan::Initialize(w);
+
+	ZVulkan::UnInitialize();
+	w.CloseWindow();
 
 	system("PAUSE");
   

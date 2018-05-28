@@ -3,6 +3,8 @@
 #ifndef ZDEVICE_HPP
 #define ZDEVICE_HPP
 
+#include <vector>
+
 namespace Zx
 {
 	class ZDevice
@@ -27,13 +29,17 @@ namespace Zx
 		static VkPhysicalDevice GetPhysicalDevice();
 		static VkDevice	GetLogicalDevice();
 
+		static const std::vector<const char*>& GetDeviceExtension();
+
 	private :
 		static VkPhysicalDevice m_physicalDevice;
 		static VkDevice m_logicalDevice;
 		static VkQueue m_graphicsQueue;
 		static VkQueue m_presentQueue;
+		static const std::vector<const char*> m_deviceExtensions;
 
 		static int GetGPUScore(VkPhysicalDevice);
+		static bool IsDeviceExtensionSupport(VkPhysicalDevice);
 	};
 }
 

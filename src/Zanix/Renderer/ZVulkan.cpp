@@ -85,36 +85,29 @@ namespace Zx
 
 		std::vector<const char*> requireExtensions = GetRequiredExtensions();
 
-		for (const char* require : requireExtensions)
-			for (const auto& extension : extensions) 
-				if (std::strcmp(require, extension.extensionName) == 0)
-					return true;
-
-		return false;
-	}
-
-	/*
-	@brief : Returns true if all the layers are supported, false otherwise
-	*/
-	bool ZVulkan::IsLayersSupported()
-	{
-		uint32_t layerCount = 0;
-
-		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 		
-		std::vector<VkLayerProperties> layers(layerCount);
-		vkEnumerateInstanceLayerProperties(&layerCount, layers.data());
 
-		for (const char* layerName : m_validationLayers)
-			for (const auto& layer : layers)
-				if (std::strcmp(layerName, layer.layerName) == 0)
-					return true;
+		for (const char* require : requireExtensions)
+		{
+			bool found = false;
+			for (const auto& extension : extensions)
+			{
+				if (std::strcmp(require, extension.extensionName) == 0)
+				{
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+				return false;
+		}
 
-		return false;
+		return true;
 	}
+	
 
 	/*
-	@brief : Returns the validation layers
+	@brief : Returns the requires validation layers
 	*/
 	const std::vector<const char*>& ZVulkan::GetValidationsLayers()
 	{
@@ -200,6 +193,35 @@ namespace Zx
 		#endif
 
 		return requireExtensions;
+	}
+
+	//----------------------------------------------------------------
+
+	bool ZVulkan::IsLayersSupported()
+	{
+		uint32_t layerCount = 0;
+
+		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+		std::vector<VkLayerProperties> layers(layerCount);
+		vkEnumerateInstanceLayerProperties(&layerCount, layers.data());
+
+		for (const char* layerName : m_validationLayers)
+		{
+			bool found = false;
+			for (const auto& layer : layers)
+			{
+				if (strcmp(layerName, layer.layerName) == 0)
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+				return false;
+		}
+		return true;
 	}
 
 	//----------------------------------------------------------------

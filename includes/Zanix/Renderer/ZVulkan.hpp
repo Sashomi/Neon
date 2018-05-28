@@ -22,7 +22,7 @@ namespace Zx
 
 		static bool IsInitialize();
 		static bool IsExtensionsSupported();
-		static bool IsLayersSupported();
+		
 
 		static VkInstance& GetVulkanInstance();
 		static VkSurfaceKHR& GetWindowSurface();
@@ -43,6 +43,7 @@ namespace Zx
 		static void CreateWindowSurface();
 		static void SetupDebugCallback();
 		static std::vector<const char*> GetRequiredExtensions();
+		static bool IsLayersSupported();
 
 
 		//Private methods require for active the Vulkan's debug callback

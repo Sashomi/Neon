@@ -7,6 +7,11 @@
 
 namespace Zx
 {
+	const std::vector<const char*> ZDevice::m_deviceExtensions =
+	{
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
+
 	/*
 	@brief : Founds an appropriate physical device
 	*/
@@ -138,6 +143,14 @@ namespace Zx
 
 		return queue;
 	}
+	
+	/*
+	@brief : Returns the require physical device extensions
+	*/
+	const std::vector<const char*>& ZDevice::GetDeviceExtension()
+	{
+		return m_deviceExtensions;
+	}
 
 	//-------------------------Private method-------------------------
 
@@ -145,7 +158,7 @@ namespace Zx
 	{
 		Queue queue = GetQueueFamiliy(device);
 
-		if (!queue.IsValidQueue())
+		if (!queue.IsValidQueue() || !(IsDeviceExtensionSupport(device)))
 			return 0;
 		
 		int score = 0;
@@ -167,6 +180,35 @@ namespace Zx
 
 		return score;
 	}
+
+	//----------------------------------------------------------------
+
+	bool ZDevice::IsDeviceExtensionSupport(VkPhysicalDevice device)
+	{
+		uint32_t extensionsCount = 0;
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionsCount, nullptr);
+		
+		std::vector<VkExtensionProperties> extensionProperties(extensionsCount);
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionsCount, extensionProperties.data());
+		
+		for (const char* extensionName : m_deviceExtensions)
+		{
+			bool found = false;
+			for (const auto& extension : extensionProperties)
+			{
+				if (std::strcmp(extension.extensionName, extensionName) == 0)
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+				return false;
+		}
+
+		return true;
+	}	
 
 	VkPhysicalDevice ZDevice::m_physicalDevice = VK_NULL_HANDLE;
 	VkDevice ZDevice::m_logicalDevice = VK_NULL_HANDLE;
