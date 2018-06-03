@@ -3,7 +3,7 @@
 
 #include <Zanix/Core/ZException.hpp>
 
-#if defined NDEBUG
+#if !defined NDEBUG
 	#define ZDEBUG
 #endif
 

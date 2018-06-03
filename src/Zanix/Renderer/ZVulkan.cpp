@@ -22,14 +22,16 @@ namespace Zx
 	{
 		if (IsInitialize())
 			ZOperationFailed(__FILE__, "ZVulkan is already initialize");
+		
+		if (!window.GetWindow())
+			ZOperationFailed(__FILE__, "The window do not be a nullptr");
 
 		m_window = window;
 
 		CreateInstance(window.GetWindowTitle());
 		SetupDebugCallback();
 		CreateWindowSurface();
-		ZDevice::FoundPhysicalDevice();
-		ZDevice::CreateLogicalDevice();
+		ZDevice::InitializeDevice();
 	}
 
 	/*
@@ -37,10 +39,9 @@ namespace Zx
 	*/
 	void ZVulkan::UnInitialize()
 	{
-		vkDestroyDevice(ZDevice::GetLogicalDevice(), nullptr);
+		ZDevice::UnInitializeDevice();
 
 		DestroyDebugReportCallbackEXT(m_instance, m_callback, nullptr);
-
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
 	}
@@ -70,6 +71,14 @@ namespace Zx
 	VkSurfaceKHR& ZVulkan::GetWindowSurface()
 	{
 		return m_surface;
+	}
+
+	/*
+	@brief : Returns the ZWindow
+	*/
+	ZWindow& ZVulkan::GetZWindow()
+	{
+		return m_window;
 	}
 
 	/*
@@ -119,7 +128,7 @@ namespace Zx
 
 	void ZVulkan::CreateInstance(const ZString& applicationName)
 	{
-		#ifndef ZDEBUG
+		#ifdef ZDEBUG
 				if (!IsLayersSupported())
 					throw ZOperationFailed(__FILE__, "Validations layers require");
 		#endif
@@ -142,7 +151,7 @@ namespace Zx
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
 		createInfo.ppEnabledExtensionNames = extensions.data();
 
-		#ifndef ZDEBUG
+		#ifdef ZDEBUG
 				createInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
 				createInfo.ppEnabledLayerNames = m_validationLayers.data();
 		#else
@@ -188,7 +197,7 @@ namespace Zx
 
 		std::vector<const char*> requireExtensions(glfwExtensions, glfwExtensions + extensionsCount);
 
-		#ifndef ZDEBUG
+		#ifdef ZDEBUG
 			requireExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 		#endif
 

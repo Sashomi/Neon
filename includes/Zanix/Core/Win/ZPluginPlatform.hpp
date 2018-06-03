@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef ZPLUGINPLATFORM_HPP
+#ifdef ZPLUGINPLATFORM_HPP
 #define ZPLUGINPLATFORM_HPP
 
 #include <Windows.h>

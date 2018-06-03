@@ -30,6 +30,7 @@ namespace Zx
 
 		ZString GetWindowTitle() const;
 		void GetWindowSize(int *width, int *height) const;
+		void GetWindowSize(uint32_t *width, uint32_t *height) const;
 
 		GLFWwindow* GetWindow() const;
 

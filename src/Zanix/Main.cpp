@@ -17,6 +17,7 @@ int main(void)
 
 	ZWindow w(1200, 600, "Zanix");
 	ZVulkan::Initialize(w);
+	
 
 	ZVulkan::UnInitialize();
 	w.CloseWindow();

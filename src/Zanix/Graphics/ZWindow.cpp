@@ -131,6 +131,17 @@ namespace Zx
 	}
 
 	/*
+	@brief : Gets the size of the ZWindow
+	@param : A pointer to the width
+	@param : A pointer to the height
+	*/
+	void ZWindow::GetWindowSize(uint32_t *width, uint32_t *height) const
+	{
+		*width = m_width;
+		*height = m_height;
+	}
+
+	/*
 	@brief : Changes the title of the ZWindow
 	@param : A constant reference to the new title of the ZWindow
 	@note : Throw an assert exception if the window is close
