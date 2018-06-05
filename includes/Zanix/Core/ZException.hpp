@@ -28,7 +28,7 @@ namespace Zx
 	/*
 	@Note : If the condition is true, then this is throw an exception
 	*/
-	#ifndef NDEBUG
+	#ifdef ZDEBUG
 		#define ZAssert(condition, message) if (!(condition)) \
 				throw ZAssertException(__FILE__, __LINE__, message)
 	#endif

@@ -8,7 +8,7 @@
 
 namespace Zx
 {
-	const std::vector<const char*> ZVulkan::m_validationLayers =
+	const std::vector<const char*> ZVulkan::s_validationLayers =
 	{
 		"VK_LAYER_LUNARG_standard_validation"
 	};
@@ -26,7 +26,7 @@ namespace Zx
 		if (!window.GetWindow())
 			ZOperationFailed(__FILE__, "The window do not be a nullptr");
 
-		m_window = window;
+		s_window = window;
 
 		CreateInstance(window.GetWindowTitle());
 		SetupDebugCallback();
@@ -41,9 +41,9 @@ namespace Zx
 	{
 		ZDevice::UnInitializeDevice();
 
-		DestroyDebugReportCallbackEXT(m_instance, m_callback, nullptr);
-		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
-		vkDestroyInstance(m_instance, nullptr);
+		DestroyDebugReportCallbackEXT(s_instance, s_callback, nullptr);
+		vkDestroySurfaceKHR(s_instance, s_surface, nullptr);
+		vkDestroyInstance(s_instance, nullptr);
 	}
 
 	/*
@@ -51,7 +51,7 @@ namespace Zx
 	*/
 	bool ZVulkan::IsInitialize()
 	{
-		return (m_instance);
+		return (s_instance);
 	}
 
 	/*
@@ -62,7 +62,7 @@ namespace Zx
 	{
 		ZAssert(IsInitialize(), "Vulkan api not initiallize");
 		
-		return (m_instance);
+		return (s_instance);
 	}
 
 	/*
@@ -70,7 +70,7 @@ namespace Zx
 	*/
 	VkSurfaceKHR& ZVulkan::GetWindowSurface()
 	{
-		return m_surface;
+		return (s_surface);
 	}
 
 	/*
@@ -78,7 +78,7 @@ namespace Zx
 	*/
 	ZWindow& ZVulkan::GetZWindow()
 	{
-		return m_window;
+		return (s_window);
 	}
 
 	/*
@@ -94,19 +94,16 @@ namespace Zx
 
 		std::vector<const char*> requireExtensions = GetRequiredExtensions();
 
-		
-
 		for (const char* require : requireExtensions)
 		{
 			bool found = false;
 			for (const auto& extension : extensions)
-			{
 				if (std::strcmp(require, extension.extensionName) == 0)
 				{
 					found = true;
 					break;
 				}
-			}
+
 			if (!found)
 				return false;
 		}
@@ -120,7 +117,7 @@ namespace Zx
 	*/
 	const std::vector<const char*>& ZVulkan::GetValidationsLayers()
 	{
-		return m_validationLayers;
+		return s_validationLayers;
 	}
 
 
@@ -129,8 +126,8 @@ namespace Zx
 	void ZVulkan::CreateInstance(const ZString& applicationName)
 	{
 		#ifdef ZDEBUG
-				if (!IsLayersSupported())
-					throw ZOperationFailed(__FILE__, "Validations layers require");
+			if (!IsLayersSupported())
+				throw ZOperationFailed(__FILE__, "Validations layers require");
 		#endif
 
 		//Application information
@@ -152,13 +149,13 @@ namespace Zx
 		createInfo.ppEnabledExtensionNames = extensions.data();
 
 		#ifdef ZDEBUG
-				createInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
-				createInfo.ppEnabledLayerNames = m_validationLayers.data();
+			createInfo.enabledLayerCount = static_cast<uint32_t>(s_validationLayers.size());
+			createInfo.ppEnabledLayerNames = s_validationLayers.data();
 		#else
-				createInfo.enabledLayerCount = 0;
+			createInfo.enabledLayerCount = 0;
 		#endif
 
-		if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
+		if (vkCreateInstance(&createInfo, nullptr, &s_instance) != VK_SUCCESS)
 			throw ZOperationFailed(__FILE__, "Failed to create Vulkan instance");
 	}
 
@@ -166,7 +163,7 @@ namespace Zx
 
 	void ZVulkan::CreateWindowSurface()
 	{
-		if (glfwCreateWindowSurface(m_instance, m_window.GetWindow(), nullptr, &m_surface) != VK_SUCCESS)
+		if (glfwCreateWindowSurface(s_instance, s_window.GetWindow(), nullptr, &s_surface) != VK_SUCCESS)
 			ZOperationFailed(__FILE__, "Failed to create window surface");
 	}
 
@@ -174,16 +171,16 @@ namespace Zx
 
 	void ZVulkan::SetupDebugCallback()
 	{
-		#ifdef ZDEBUG
+		#ifndef ZDEBUG
 				return;
 		#endif
-
+		
 		VkDebugReportCallbackCreateInfoEXT createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
 		createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
 		createInfo.pfnCallback = DebugCallback;
-
-		if (CreateDebugReportCallbackEXT(m_instance, &createInfo, nullptr, &m_callback) != VK_SUCCESS)
+	
+		if (CreateDebugReportCallbackEXT(s_instance, &createInfo, nullptr, &s_callback) != VK_SUCCESS)
 			throw ZOperationFailed(__FILE__, "Failed to set up debug callback");
 	}
 
@@ -193,6 +190,7 @@ namespace Zx
 	{
 		uint32_t extensionsCount = 0;
 		const char** glfwExtensions;
+
 		glfwExtensions = glfwGetRequiredInstanceExtensions(&extensionsCount);
 
 		std::vector<const char*> requireExtensions(glfwExtensions, glfwExtensions + extensionsCount);
@@ -215,21 +213,20 @@ namespace Zx
 		std::vector<VkLayerProperties> layers(layerCount);
 		vkEnumerateInstanceLayerProperties(&layerCount, layers.data());
 
-		for (const char* layerName : m_validationLayers)
+		for (const char* layerName : s_validationLayers)
 		{
 			bool found = false;
 			for (const auto& layer : layers)
-			{
 				if (strcmp(layerName, layer.layerName) == 0)
 				{
 					found = true;
 					break;
 				}
-			}
 
 			if (!found)
 				return false;
 		}
+
 		return true;
 	}
 
@@ -242,7 +239,7 @@ namespace Zx
 	{
 		auto func = (PFN_vkCreateDebugReportCallbackEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
 
-		if (func) 
+		if (func)
 			return func(instance, pCreateInfo, pAllocator, pCallback);
 		else 
 			return VK_ERROR_EXTENSION_NOT_PRESENT;
@@ -252,15 +249,14 @@ namespace Zx
 
 	void ZVulkan::DestroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator) 
 	{
-		#ifdef ZDEBUG
+		#ifndef ZDEBUG
 			return;
 		#endif
 
 		auto func = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
 
-		if (func != nullptr) {
+		if (!func)
 			func(instance, callback, pAllocator);
-		}
 	}
 
 	//----------------------------------------------------------------
@@ -279,8 +275,8 @@ namespace Zx
 		return VK_FALSE;
 	}
 
-	VkDebugReportCallbackEXT ZVulkan::m_callback = VK_NULL_HANDLE;
-	VkInstance ZVulkan::m_instance = VK_NULL_HANDLE;
-	ZWindow ZVulkan::m_window;
-	VkSurfaceKHR ZVulkan::m_surface = VK_NULL_HANDLE;
+	VkDebugReportCallbackEXT ZVulkan::s_callback = VK_NULL_HANDLE;
+	VkInstance ZVulkan::s_instance = VK_NULL_HANDLE;
+	ZWindow ZVulkan::s_window;
+	VkSurfaceKHR ZVulkan::s_surface = VK_NULL_HANDLE;
 }

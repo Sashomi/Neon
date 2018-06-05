@@ -1,8 +1,6 @@
 #ifndef ZUTILS_HPP
 #define ZUTILS_HPP
 
-#include <Zanix/Core/ZException.hpp>
-
 #if !defined NDEBUG
 	#define ZDEBUG
 #endif
@@ -13,5 +11,7 @@
 	#define ZANIX_EXPORT __declspec(dllexport)
 	#define ZANIX_IMPORT __declspec(dllimport)
 #endif
+
+#include <Zanix/Core/ZException.hpp>
 
 #endif //ZUTILS_HPP

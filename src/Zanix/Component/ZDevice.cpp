@@ -9,7 +9,7 @@
 
 namespace Zx
 {
-	const std::vector<const char*> ZDevice::m_deviceExtensions =
+	const std::vector<const char*> ZDevice::s_deviceExtensions =
 	{
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
@@ -29,8 +29,8 @@ namespace Zx
 	*/
 	void ZDevice::UnInitializeDevice()
 	{
-		vkDestroySwapchainKHR(m_logicalDevice, m_swapChain, nullptr);
-		vkDestroyDevice(m_logicalDevice, nullptr);
+		vkDestroySwapchainKHR(s_logicalDevice, s_swapChain, nullptr);
+		vkDestroyDevice(s_logicalDevice, nullptr);
 	}
 
 	/*
@@ -38,7 +38,7 @@ namespace Zx
 	*/
 	VkPhysicalDevice& ZDevice::GetPhysicalDevice()
 	{
-		return m_physicalDevice;
+		return s_physicalDevice;
 	}
 
 	/*
@@ -46,7 +46,7 @@ namespace Zx
 	*/
 	VkDevice& ZDevice::GetLogicalDevice()
 	{
-		return m_logicalDevice;
+		return s_logicalDevice;
 	}
 
 	/*
@@ -54,7 +54,7 @@ namespace Zx
 	*/
 	VkSwapchainKHR& ZDevice::GetSwapChain()
 	{
-		return m_swapChain;
+		return s_swapChain;
 	}
 
 	/*
@@ -99,14 +99,14 @@ namespace Zx
 	*/
 	const std::vector<const char*>& ZDevice::GetDeviceExtension()
 	{
-		return m_deviceExtensions;
+		return s_deviceExtensions;
 	}	
 
 	//-------------------------Private method-------------------------
 
 	void ZDevice::CreateLogicalDevice()
 	{
-		Queue queue = GetQueueFamiliy(m_physicalDevice);
+		Queue queue = GetQueueFamiliy(s_physicalDevice);
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 
@@ -135,8 +135,8 @@ namespace Zx
 
 		createInfo.pEnabledFeatures = &physicalDeviceFeatures;
 
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(m_deviceExtensions.size());
-		createInfo.ppEnabledExtensionNames = m_deviceExtensions.data();
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(s_deviceExtensions.size());
+		createInfo.ppEnabledExtensionNames = s_deviceExtensions.data();
 
 		#ifdef ZDEBUG
 				createInfo.enabledLayerCount = static_cast<uint32_t>(ZVulkan::GetValidationsLayers().size());
@@ -145,11 +145,11 @@ namespace Zx
 				createInfo.enabledLayerCount = 0;
 		#endif
 
-		if (vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_logicalDevice) != VK_SUCCESS)
+		if (vkCreateDevice(s_physicalDevice, &createInfo, nullptr, &s_logicalDevice) != VK_SUCCESS)
 			throw ZOperationFailed(__FILE__, "Failed to create logical device");
 
-		vkGetDeviceQueue(m_logicalDevice, queue.indexFamily, 0, &m_graphicsQueue);
-		vkGetDeviceQueue(m_logicalDevice, queue.presentFamily, 0, &m_presentQueue);
+		vkGetDeviceQueue(s_logicalDevice, queue.indexFamily, 0, &s_graphicsQueue);
+		vkGetDeviceQueue(s_logicalDevice, queue.presentFamily, 0, &s_presentQueue);
 	}
 
 	//----------------------------------------------------------------
@@ -167,15 +167,17 @@ namespace Zx
 
 		std::multimap<int, VkPhysicalDevice> devicesMap;
 
+		int score = 0;
+
 		for (const auto& device : devices)
 		{
-			int score = GetGPUScore(device);
+			score = GetGPUScore(device);
 			devicesMap.insert(std::make_pair(score, device));
 		}
 
 		//We get the best GPU
 		if (devicesMap.rbegin()->first > 0)
-			m_physicalDevice = devicesMap.rbegin()->second;
+			s_physicalDevice = devicesMap.rbegin()->second;
 		else
 			throw ZOperationFailed(__FILE__, "Failed to find a suitable GPU");
 	}
@@ -184,7 +186,7 @@ namespace Zx
 
 	void ZDevice::CreateSwapChain()
 	{
-		SwapChainDetails swapChain = BuildSwapChainDetails(m_physicalDevice);
+		SwapChainDetails swapChain = BuildSwapChainDetails(s_physicalDevice);
 
 		VkSurfaceFormatKHR surfaceFormat = GetSwapSurfaceFormat(swapChain.format);
 		VkPresentModeKHR presentMode = GetSwapPresentMode(swapChain.presentmode);
@@ -192,9 +194,8 @@ namespace Zx
 
 		uint32_t imageCount = swapChain.capabilities.minImageCount + 1;
 
-		if (swapChain.capabilities.maxImageCount > 0 && imageCount > swapChain.capabilities.maxImageCount) {
+		if (swapChain.capabilities.maxImageCount > 0 && imageCount > swapChain.capabilities.maxImageCount)
 			imageCount = swapChain.capabilities.maxImageCount;
-		}
 
 		VkSwapchainCreateInfoKHR createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -207,7 +208,7 @@ namespace Zx
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-		Queue index = GetQueueFamiliy(m_physicalDevice);
+		Queue index = GetQueueFamiliy(s_physicalDevice);
 		uint32_t familyIndex[] = { (uint32_t)index.indexFamily, (uint32_t)index.presentFamily };
 
 		if (index.indexFamily != index.presentFamily)
@@ -229,16 +230,15 @@ namespace Zx
 		createInfo.clipped = VK_TRUE; // On ignore les pixels cachés
 		createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-		if (vkCreateSwapchainKHR(m_logicalDevice, &createInfo, nullptr, &m_swapChain) != VK_SUCCESS) {
+		if (vkCreateSwapchainKHR(s_logicalDevice, &createInfo, nullptr, &s_swapChain) != VK_SUCCESS)
 			throw ZOperationFailed(__FILE__, "Failed to create swap chain");
-		}
 
-		vkGetSwapchainImagesKHR(m_logicalDevice, m_swapChain, &imageCount, nullptr);
-		m_swapChainImage.resize(imageCount);
-		vkGetSwapchainImagesKHR(m_logicalDevice, m_swapChain, &imageCount, m_swapChainImage.data());
+		vkGetSwapchainImagesKHR(s_logicalDevice, s_swapChain, &imageCount, nullptr);
+		s_swapChainImage.resize(imageCount);
+		vkGetSwapchainImagesKHR(s_logicalDevice, s_swapChain, &imageCount, s_swapChainImage.data());
 
-		m_swapChainExtent = extent;
-		m_swapChainImageFormat = surfaceFormat.format;
+		s_swapChainExtent = extent;
+		s_swapChainImageFormat = surfaceFormat.format;
 	}
 
 	//----------------------------------------------------------------
@@ -246,7 +246,7 @@ namespace Zx
 	int ZDevice::GetGPUScore(VkPhysicalDevice device)
 	{
 		Queue queue = GetQueueFamiliy(device);
-
+		
 		if (!queue.IsValidQueue() || !(IsDeviceExtensionSupport(device)))
 			return 0;
 
@@ -264,16 +264,16 @@ namespace Zx
 
 		VkPhysicalDeviceFeatures deviceFeatures;
 		vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+		// Si le GPU ne supporte pas les shaders
+		if (!(deviceFeatures.geometryShader))
+			return 0;
 		
 		if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
 			score += 1000;
 
 		score += deviceProperties.limits.maxImageDimension2D;
 		score += deviceProperties.limits.maxViewports;
-
-		// Si le GPU ne supporte pas les shaders
-		if (!(deviceFeatures.geometryShader))
-			return 0;
 
 		return score;
 	}
@@ -341,17 +341,15 @@ namespace Zx
 		std::vector<VkExtensionProperties> extensionProperties(extensionsCount);
 		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionsCount, extensionProperties.data());
 
-		for (const char* extensionName : m_deviceExtensions)
+		for (const char* extensionName : s_deviceExtensions)
 		{
 			bool found = false;
 			for (const auto& extension : extensionProperties)
-			{
 				if (std::strcmp(extension.extensionName, extensionName) == 0)
 				{
 					found = true;
 					break;
 				}
-			}
 
 			if (!found)
 				return false;
@@ -369,12 +367,12 @@ namespace Zx
 		return vec;
 	}
 
-	VkPhysicalDevice ZDevice::m_physicalDevice = VK_NULL_HANDLE;
-	VkDevice ZDevice::m_logicalDevice = VK_NULL_HANDLE;
-	VkQueue ZDevice::m_graphicsQueue = VK_NULL_HANDLE;
-	VkQueue ZDevice::m_presentQueue = VK_NULL_HANDLE;
-	VkSwapchainKHR ZDevice::m_swapChain = VK_NULL_HANDLE;
-	std::vector<VkImage> ZDevice::m_swapChainImage = BuildVectorVkImage();
-	VkFormat ZDevice::m_swapChainImageFormat = VK_FORMAT_UNDEFINED;
-	VkExtent2D ZDevice::m_swapChainExtent = { 0, 0 };
+	VkPhysicalDevice ZDevice::s_physicalDevice = VK_NULL_HANDLE;
+	VkDevice ZDevice::s_logicalDevice = VK_NULL_HANDLE;
+	VkQueue ZDevice::s_graphicsQueue = VK_NULL_HANDLE;
+	VkQueue ZDevice::s_presentQueue = VK_NULL_HANDLE;
+	VkSwapchainKHR ZDevice::s_swapChain = VK_NULL_HANDLE;
+	std::vector<VkImage> ZDevice::s_swapChainImage = BuildVectorVkImage();
+	VkFormat ZDevice::s_swapChainImageFormat = VK_FORMAT_UNDEFINED;
+	VkExtent2D ZDevice::s_swapChainExtent = { 0, 0 };
 }

@@ -42,15 +42,15 @@ namespace Zx
 		static const std::vector<const char*>& GetDeviceExtension();
 
 	private :
-		static VkPhysicalDevice m_physicalDevice;
-		static VkDevice m_logicalDevice;
-		static VkQueue m_graphicsQueue;
-		static VkQueue m_presentQueue;
-		static const std::vector<const char*> m_deviceExtensions;
-		static VkSwapchainKHR m_swapChain;
-		static std::vector<VkImage> m_swapChainImage;
-		static VkFormat m_swapChainImageFormat;
-		static VkExtent2D m_swapChainExtent;
+		static VkPhysicalDevice s_physicalDevice;
+		static VkDevice s_logicalDevice;
+		static VkQueue s_graphicsQueue;
+		static VkQueue s_presentQueue;
+		static const std::vector<const char*> s_deviceExtensions;
+		static VkSwapchainKHR s_swapChain;
+		static std::vector<VkImage> s_swapChainImage;
+		static VkFormat s_swapChainImageFormat;
+		static VkExtent2D s_swapChainExtent;
 
 
 		static void FoundPhysicalDevice();

@@ -34,11 +34,11 @@ namespace Zx
 		
 	private :
 		//Attributes
-		static VkInstance m_instance;
-		static VkDebugReportCallbackEXT m_callback;
-		static ZWindow m_window;
-		static VkSurfaceKHR m_surface;
-		static const std::vector<const char*> m_validationLayers;
+		static VkInstance s_instance;
+		static VkDebugReportCallbackEXT s_callback;
+		static ZWindow s_window;
+		static VkSurfaceKHR s_surface;
+		static const std::vector<const char*> s_validationLayers;
 
 		//Private methods
 		static void CreateInstance(const ZString&);
