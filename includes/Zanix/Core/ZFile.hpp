@@ -9,9 +9,8 @@
 
 namespace Zx 
 {
-	class ZFile 
+	class ZFile
 	{
-
 	public :
 		ZFile(const ZString& filePath = "unknown");
 		

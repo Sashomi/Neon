@@ -33,6 +33,8 @@
 
 #Zanix
 Debug/*
+modules/*
+Test/*
 *.sln
 *.vcxproj
 *.vcxproj.filters
@@ -40,4 +42,3 @@ Debug/*
 .vs/*
 x64
 *.txt
-

@@ -6,12 +6,12 @@
 #include <iostream>
 #include <memory>
 
-#include "ZString.hpp"
-
 namespace Zx
 {
 	class ZILogger
 	{
+		class ZString;
+
 	public:
 		ZILogger() = default;
 

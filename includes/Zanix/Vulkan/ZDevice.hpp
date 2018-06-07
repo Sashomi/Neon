@@ -4,6 +4,7 @@
 #define ZDEVICE_HPP
 
 #include <vector>
+#include <vulkan/vulkan.h>
 
 namespace Zx
 {
@@ -18,13 +19,6 @@ namespace Zx
 			inline bool IsValidQueue();
 		};
 
-		struct SwapChainDetails
-		{
-			VkSurfaceCapabilitiesKHR capabilities;
-			std::vector<VkSurfaceFormatKHR> format;
-			std::vector<VkPresentModeKHR> presentmode;
-		};
-
 		//----------------------------------------------
 
 		ZDevice() = default;
@@ -37,7 +31,6 @@ namespace Zx
 
 		static VkPhysicalDevice& GetPhysicalDevice();
 		static VkDevice& GetLogicalDevice();
-		static VkSwapchainKHR& GetSwapChain();
 	
 		static const std::vector<const char*>& GetDeviceExtension();
 
@@ -47,26 +40,12 @@ namespace Zx
 		static VkQueue s_graphicsQueue;
 		static VkQueue s_presentQueue;
 		static const std::vector<const char*> s_deviceExtensions;
-		static VkSwapchainKHR s_swapChain;
-		static std::vector<VkImage> s_swapChainImage;
-		static VkFormat s_swapChainImageFormat;
-		static VkExtent2D s_swapChainExtent;
-
 
 		static void FoundPhysicalDevice();
 		static void CreateLogicalDevice();
-		static void CreateSwapChain();
 
 		static int GetGPUScore(VkPhysicalDevice);
 		static bool IsDeviceExtensionSupport(VkPhysicalDevice);
-
-		static VkSurfaceFormatKHR GetSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>&);
-		static VkExtent2D GetSwapExtent(const VkSurfaceCapabilitiesKHR&);
-		static VkPresentModeKHR GetSwapPresentMode(const std::vector<VkPresentModeKHR>&);
-
-		static inline SwapChainDetails BuildSwapChainDetails(VkPhysicalDevice);
-
-		static std::vector<VkImage> BuildVectorVkImage();
 	};
 }
 

@@ -1,4 +1,5 @@
-#include <Zanix/ZUtils.hpp>
+#include <Zanix/Core/ZException.hpp>
+#include <Zanix/Core/ZString.hpp>
 #include <Zanix/Core/ZFile.hpp>
 
 namespace Zx 

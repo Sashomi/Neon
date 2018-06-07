@@ -6,8 +6,6 @@
 #include <iostream>
 #include <memory>
 
-#include <Zanix/ZUtils.hpp>
-
 namespace Zx
 {
 	class ZString;

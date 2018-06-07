@@ -12,6 +12,4 @@
 	#define ZANIX_IMPORT __declspec(dllimport)
 #endif
 
-#include <Zanix/Core/ZException.hpp>
-
 #endif //ZUTILS_HPP

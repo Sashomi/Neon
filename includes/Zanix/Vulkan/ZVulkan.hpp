@@ -6,7 +6,7 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-// @Alexander Overvoorde
+//@Alexander Overvoorde
 
 namespace Zx
 {

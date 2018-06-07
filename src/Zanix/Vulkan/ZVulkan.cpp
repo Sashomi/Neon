@@ -1,10 +1,11 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include <Zanix/Component/ZDevice.hpp>
+#include <Zanix/Vulkan/ZDevice.hpp>
+#include <Zanix/Vulkan/ZSwapChain.hpp>
 #include <Zanix/Graphics/ZWindow.hpp>
-#include <Zanix/ZUtils.hpp>
-#include <Zanix/Renderer/ZVulkan.hpp>
+#include <Zanix/Core/ZException.hpp>
+#include <Zanix/Vulkan/ZVulkan.hpp>
 
 namespace Zx
 {
@@ -32,6 +33,7 @@ namespace Zx
 		SetupDebugCallback();
 		CreateWindowSurface();
 		ZDevice::InitializeDevice();
+		ZSwapChain::InitializeSwapChain();
 	}
 
 	/*
@@ -39,6 +41,7 @@ namespace Zx
 	*/
 	void ZVulkan::UnInitialize()
 	{
+		ZSwapChain::UnInitializeSwapChain();
 		ZDevice::UnInitializeDevice();
 
 		DestroyDebugReportCallbackEXT(s_instance, s_callback, nullptr);

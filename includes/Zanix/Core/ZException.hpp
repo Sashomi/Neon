@@ -5,6 +5,7 @@
 
 #include <iostream>
 
+#include <Zanix/ZUtils.hpp>
 #include <Zanix/Core/ZString.hpp>
 
 namespace Zx

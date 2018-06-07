@@ -1,7 +1,8 @@
 #include <Zanix/Graphics/ZWindow.hpp>
-#include <Zanix/Renderer/ZVulkan.hpp>
-#include <Zanix/ZUtils.hpp>
-#include <Zanix/Component/ZDevice.hpp>
+#include <Zanix/Vulkan/ZVulkan.hpp>
+#include <Zanix/Vulkan/ZSwapChain.hpp>
+#include <Zanix/Core/ZException.hpp>
+#include <Zanix/Vulkan/ZDevice.hpp>
 
 #include <set>
 #include <map>
@@ -21,7 +22,6 @@ namespace Zx
 	{
 		FoundPhysicalDevice();
 		CreateLogicalDevice();
-		CreateSwapChain();
 	}
 
 	/*
@@ -29,7 +29,8 @@ namespace Zx
 	*/
 	void ZDevice::UnInitializeDevice()
 	{
-		vkDestroySwapchainKHR(s_logicalDevice, s_swapChain, nullptr);
+		
+
 		vkDestroyDevice(s_logicalDevice, nullptr);
 	}
 
@@ -47,14 +48,6 @@ namespace Zx
 	VkDevice& ZDevice::GetLogicalDevice()
 	{
 		return s_logicalDevice;
-	}
-
-	/*
-	@brief : Returns the swap chain
-	*/
-	VkSwapchainKHR& ZDevice::GetSwapChain()
-	{
-		return s_swapChain;
 	}
 
 	/*
@@ -102,7 +95,7 @@ namespace Zx
 		return s_deviceExtensions;
 	}	
 
-	//-------------------------Private method-------------------------
+	//-------------------------Private methods-------------------------
 
 	void ZDevice::CreateLogicalDevice()
 	{
@@ -184,65 +177,6 @@ namespace Zx
 
 	//----------------------------------------------------------------
 
-	void ZDevice::CreateSwapChain()
-	{
-		SwapChainDetails swapChain = BuildSwapChainDetails(s_physicalDevice);
-
-		VkSurfaceFormatKHR surfaceFormat = GetSwapSurfaceFormat(swapChain.format);
-		VkPresentModeKHR presentMode = GetSwapPresentMode(swapChain.presentmode);
-		VkExtent2D extent = GetSwapExtent(swapChain.capabilities);
-
-		uint32_t imageCount = swapChain.capabilities.minImageCount + 1;
-
-		if (swapChain.capabilities.maxImageCount > 0 && imageCount > swapChain.capabilities.maxImageCount)
-			imageCount = swapChain.capabilities.maxImageCount;
-
-		VkSwapchainCreateInfoKHR createInfo = {};
-		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-		createInfo.surface = ZVulkan::GetWindowSurface();
-
-		createInfo.minImageCount = imageCount;
-		createInfo.imageFormat = surfaceFormat.format;
-		createInfo.imageColorSpace = surfaceFormat.colorSpace;
-		createInfo.imageExtent = extent;
-		createInfo.imageArrayLayers = 1;
-		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-		Queue index = GetQueueFamiliy(s_physicalDevice);
-		uint32_t familyIndex[] = { (uint32_t)index.indexFamily, (uint32_t)index.presentFamily };
-
-		if (index.indexFamily != index.presentFamily)
-		{
-			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-			createInfo.queueFamilyIndexCount = 2;
-			createInfo.pQueueFamilyIndices = familyIndex;
-		}
-		else
-		{
-			createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE; //Meilleur performance
-			createInfo.queueFamilyIndexCount = 0;
-			createInfo.pQueueFamilyIndices = nullptr;
-		}
-
-		createInfo.preTransform = swapChain.capabilities.currentTransform; //Pas de transformation
-		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-		createInfo.presentMode = presentMode;
-		createInfo.clipped = VK_TRUE; // On ignore les pixels cachés
-		createInfo.oldSwapchain = VK_NULL_HANDLE;
-
-		if (vkCreateSwapchainKHR(s_logicalDevice, &createInfo, nullptr, &s_swapChain) != VK_SUCCESS)
-			throw ZOperationFailed(__FILE__, "Failed to create swap chain");
-
-		vkGetSwapchainImagesKHR(s_logicalDevice, s_swapChain, &imageCount, nullptr);
-		s_swapChainImage.resize(imageCount);
-		vkGetSwapchainImagesKHR(s_logicalDevice, s_swapChain, &imageCount, s_swapChainImage.data());
-
-		s_swapChainExtent = extent;
-		s_swapChainImageFormat = surfaceFormat.format;
-	}
-
-	//----------------------------------------------------------------
-
 	int ZDevice::GetGPUScore(VkPhysicalDevice device)
 	{
 		Queue queue = GetQueueFamiliy(device);
@@ -252,7 +186,7 @@ namespace Zx
 
 		//Nécessite la vérification des extensions IsDeviceExtensionSupport
 		bool swapChainAdequate = false;
-		SwapChainDetails details = BuildSwapChainDetails(device);
+		ZSwapChain::SwapChainDetails details = ZSwapChain::BuildSwapChainDetails(device);
 		swapChainAdequate = !details.format.empty() && !details.presentmode.empty();
 
 		if (!swapChainAdequate)
@@ -277,60 +211,7 @@ namespace Zx
 
 		return score;
 	}
-
-	//----------------------------------------------------------------
 	
-	VkExtent2D ZDevice::GetSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilitities)
-	{
-		if (surfaceCapabilitities.currentExtent.width != std::numeric_limits<uint32_t>::max())
-			return surfaceCapabilitities.currentExtent;
-
-		uint32_t width = 0, height = 0;
-		ZWindow window = ZVulkan::GetZWindow();
-		window.GetWindowSize(&width, &height);
-
-		VkExtent2D actualExtent = { width, height };
-
-		actualExtent.width = std::max(surfaceCapabilitities.minImageExtent.width, std::min(surfaceCapabilitities.maxImageExtent.width, actualExtent.width));
-		actualExtent.height = std::max(surfaceCapabilitities.minImageExtent.height, std::min(surfaceCapabilitities.maxImageExtent.height, actualExtent.height));
-	
-		return actualExtent;
-	}
-
-	//----------------------------------------------------------------
-
-	VkSurfaceFormatKHR ZDevice::GetSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& surfaceFormat)
-	{
-		// Si la surface n'a aucun format favoris, dans ce cas la taille de "surfaceFormat" vaut 1
-		if (surfaceFormat.size() == 1 && surfaceFormat[0].format == VK_FORMAT_UNDEFINED)
-			return {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
-
-		// On cherche la meilleure possibilitée
-		for (const auto& format : surfaceFormat)
-			if (format.format == VK_FORMAT_B8G8R8A8_UNORM && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-				return format;
-
-		return surfaceFormat[0];
-	}
-	//----------------------------------------------------------------
-
-
-	VkPresentModeKHR ZDevice::GetSwapPresentMode(const std::vector<VkPresentModeKHR>& presentMode)
-	{
-		VkPresentModeKHR mode = VK_PRESENT_MODE_FIFO_KHR;
-
-		for (const auto& presentMde : presentMode)
-		{
-			//Triple mise en mémoire
-			if (presentMde == VK_PRESENT_MODE_MAILBOX_KHR)
-				return presentMde;
-			else if (presentMde == VK_PRESENT_MODE_IMMEDIATE_KHR)
-				mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-		}
-
-		return mode;
-	}
-
 	//----------------------------------------------------------------
 
 	bool ZDevice::IsDeviceExtensionSupport(VkPhysicalDevice device)
@@ -358,21 +239,8 @@ namespace Zx
 		return true;
 	}
 
-	//----------------------------------------------------------------
-
-	std::vector<VkImage> ZDevice::BuildVectorVkImage()
-	{
-		std::vector<VkImage> vec;
-
-		return vec;
-	}
-
 	VkPhysicalDevice ZDevice::s_physicalDevice = VK_NULL_HANDLE;
 	VkDevice ZDevice::s_logicalDevice = VK_NULL_HANDLE;
 	VkQueue ZDevice::s_graphicsQueue = VK_NULL_HANDLE;
 	VkQueue ZDevice::s_presentQueue = VK_NULL_HANDLE;
-	VkSwapchainKHR ZDevice::s_swapChain = VK_NULL_HANDLE;
-	std::vector<VkImage> ZDevice::s_swapChainImage = BuildVectorVkImage();
-	VkFormat ZDevice::s_swapChainImageFormat = VK_FORMAT_UNDEFINED;
-	VkExtent2D ZDevice::s_swapChainExtent = { 0, 0 };
 }

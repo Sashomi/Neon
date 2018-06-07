@@ -1,16 +1,11 @@
-#include <Zanix/Renderer/ZVulkan.hpp>
+#include <Zanix/Vulkan/ZVulkan.hpp>
 
 namespace Zx
 {
-	bool ZDevice::Queue::IsValidQueue()
-	{
-		return (indexFamily >= 0);
-	}
-
-	ZDevice::SwapChainDetails ZDevice::BuildSwapChainDetails(VkPhysicalDevice device)
+	ZSwapChain::SwapChainDetails ZSwapChain::BuildSwapChainDetails(VkPhysicalDevice device)
 	{
 		SwapChainDetails details;
-		
+
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, ZVulkan::GetWindowSurface(), &details.capabilities);
 
 		uint32_t formatCount = 0;

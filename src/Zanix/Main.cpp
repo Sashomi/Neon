@@ -6,8 +6,8 @@
 #include <Zanix/Core/ZString.hpp>
 #include <Zanix/Core/ZException.hpp>
 #include <Zanix/Graphics/ZWindow.hpp>
-#include <Zanix/Renderer/ZVulkan.hpp>
-#include <Zanix/Component/ZDevice.hpp>
+#include <Zanix/Vulkan/ZVulkan.hpp>
+#include <Zanix/Vulkan/ZDevice.hpp>
 
 using namespace Zx;
 
@@ -17,7 +17,6 @@ int main(void)
 
 	ZWindow w(1200, 600, "Zanix");
 	ZVulkan::Initialize(w);
-	
 
 	ZVulkan::UnInitialize();
 	w.CloseWindow();

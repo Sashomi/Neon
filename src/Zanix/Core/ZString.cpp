@@ -1,5 +1,5 @@
+#include <Zanix/Core/ZException.hpp>
 #include <Zanix/Core/ZString.hpp>
-#include <Zanix/ZUtils.hpp>
 
 #include <memory>
 #include <cstdlib>
@@ -384,7 +384,7 @@ namespace Zx
 	*/
 	ZString& ZString::operator=(ZString&& string)
 	{
-		int size = string.GetSize();
+		std::size_t size = string.GetSize();
 		m_string = std::make_shared<String>(string.GetSize());
 		std::swap(m_string, string.m_string);
 

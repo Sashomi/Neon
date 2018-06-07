@@ -8,7 +8,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include <Zanix/ZUtils.hpp>
+#include <Zanix/Core/ZString.hpp>
 
 namespace Zx
 {
