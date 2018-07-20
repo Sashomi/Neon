@@ -42,3 +42,4 @@ Test/*
 .vs/*
 x64
 *.txt
+shaders/*

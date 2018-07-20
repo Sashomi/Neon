@@ -1,4 +1,3 @@
-#include <Zanix/Vulkan/ZVulkan.hpp>
 #include <Zanix/Core/ZException.hpp>
 #include <Zanix/Graphics/ZWindow.hpp>
 
