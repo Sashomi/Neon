@@ -1,12 +1,64 @@
 #include <Zanix/Core/ZException.hpp>
 #include <Zanix/Renderer/ZRenderer.hpp>
+#include <Zanix/Renderer/ZDevice.hpp>
+#include <Zanix/Renderer/ZSwapChain.hpp>
+#include <Zanix/Renderer/ZCommandBuffers.hpp>
 #include <Zanix/Renderer/Win32/ZPlatform.hpp>
 
+#include <iostream>
 #include <vulkan/vulkan_win32.h>
 
 namespace Zx
 {
-	void ZPlatform::CreateSurface()
+	LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+		switch (message) {
+		case WM_SIZE:
+		case WM_EXITSIZEMOVE:
+			PostMessage(hWnd, WM_USER + 1, wParam, lParam);
+			break;
+		case WM_KEYDOWN:
+		case WM_CLOSE:
+			PostMessage(hWnd, WM_USER + 2, wParam, lParam);
+			break;
+		default:
+			return DefWindowProc(hWnd, message, wParam, lParam);
+		}
+		return 0;
+	}
+
+	bool ZPlatform::CreateZWindow(int width, int height, const ZString& title)
+	{
+		s_windowInstance = GetModuleHandle(nullptr);
+
+		WNDCLASSEX wcex;
+
+		wcex.cbSize = sizeof(WNDCLASSEX);
+
+		wcex.style = CS_HREDRAW | CS_VREDRAW;
+		wcex.lpfnWndProc = WndProc;
+		wcex.cbClsExtra = 0;
+		wcex.cbWndExtra = 0;
+		wcex.hInstance = s_windowInstance;
+		wcex.hIcon = nullptr;
+		wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+		wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+		wcex.lpszMenuName = nullptr;
+		wcex.lpszClassName = "Zanix Engine";
+		wcex.hIconSm = nullptr;
+
+		if (!RegisterClassEx(&wcex)) {
+			return false;
+		}
+
+		s_windowHandle = CreateWindow("Zanix Engine", title.GetPtr(), WS_OVERLAPPEDWINDOW, 20, 20, width, height, nullptr, nullptr, s_windowInstance, nullptr);
+
+		if (!s_windowHandle)
+			return false;
+
+		return true;
+	}
+	
+	bool ZPlatform::CreateSurface()
 	{
 		VkWin32SurfaceCreateInfoKHR surfaceInfo =
 		{
@@ -17,16 +69,16 @@ namespace Zx
 			s_windowHandle
 		};
 
-		if (vkCreateWin32SurfaceKHR(ZRenderer::GetVulkanInstance(), &surfaceInfo, nullptr, &s_windowSurface) != VK_SUCCESS)
-			throw ZOperationFailed(__FILE__, "Failed to create a win32 surface.");
-	}
+		if (vkCreateWin32SurfaceKHR(ZRenderer::GetVulkanInstance(), &surfaceInfo, nullptr, &s_windowSurface) == VK_SUCCESS)
+			return true;
 
-	VkSurfaceKHR ZPlatform::GetSurface()
+		std::cout << "Could not create presentation surface." << std::endl;
+
+		return false;
+	}
+	
+	const VkSurfaceKHR& ZPlatform::GetSurface() const
 	{
 		return s_windowSurface;
 	}
-
-	HINSTANCE ZPlatform::s_windowInstance = VK_NULL_HANDLE;
-	HWND ZPlatform::s_windowHandle = VK_NULL_HANDLE;
-	VkSurfaceKHR ZPlatform::s_windowSurface = VK_NULL_HANDLE;
 }

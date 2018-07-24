@@ -14,7 +14,7 @@ namespace Zx
 		static void Initialize();
 		static void Destroy();
 
-		static VkInstance GetVulkanInstance();
+		static const VkInstance& GetVulkanInstance();
 
 	private:
 		static VkInstance s_instance;

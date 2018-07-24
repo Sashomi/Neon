@@ -11,16 +11,25 @@ namespace Zx
 		ZDevice() = default;
 		~ZDevice() = delete;
 
-		static void InitDevice();
+		static void CreateDevice();
 		static void DestroyDevice();
 
-		static VkDevice GetLogicalDevice();
-		static VkPhysicalDevice GetPhysicalDevice();
+		static void GetDeviceQueue();
+
+		static const VkDevice& GetLogicalDevice();
+		static const VkPhysicalDevice& GetPhysicalDevice();
+		static const VkSemaphore& GetImageAvailableSemaphore();
+		static const VkSemaphore& GetRenderingFinishedSemaphore();
+		static const VkQueue& GetPresentQueue();
+		static const VkQueue& GetGraphicsQueue();
+
+		static uint32_t GetPresentIndexFamilyQueue();
+		static uint32_t GetGraphicsIndexFamilyQueue();
 
 	private:
 		static VkDevice s_logicalDevice;
 		static VkPhysicalDevice s_physicalDevice;
-		static uint32_t s_indexFamily;
+		static uint32_t s_graphicsIndexFamily;
 		static uint32_t s_presentIndexFamily;
 		static VkQueue s_graphicsQueue;
 		static VkQueue s_presentQueue;
@@ -35,7 +44,6 @@ namespace Zx
 		static void CreateSemaphores();
 
 		static bool CheckFamilyQueue(const VkPhysicalDevice& device);
-		static void GetDeviceQueue();
 
 		static bool IsExtensionAvailable();
 	};
