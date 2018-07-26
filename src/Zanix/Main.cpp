@@ -4,14 +4,14 @@
 
 #include <vulkan/vulkan.h>
 
-#include <Zanix/Core/ZPlugin.hpp>
-#include <Zanix/Core/ZString.hpp>
-#include <Zanix/Core/ZException.hpp>
-#include <Zanix/Renderer/ZDevice.hpp>
-#include <Zanix/Renderer/ZSwapChain.hpp>
-#include <Zanix/Renderer/ZRenderer.hpp>
-#include <Zanix/Renderer/ZWindow.hpp>
-#include <Zanix/Renderer/ZCommandBuffers.hpp>
+#include <Zanix/Core/Plugin.hpp>
+#include <Zanix/Core/String.hpp>
+#include <Zanix/Core/Exception.hpp>
+#include <Zanix/Renderer/Device.hpp>
+#include <Zanix/Renderer/SwapChain.hpp>
+#include <Zanix/Renderer/Renderer.hpp>
+#include <Zanix/Renderer/Window.hpp>
+#include <Zanix/Renderer/CommandBuffers.hpp>
 
 using namespace Zx;
 
@@ -19,11 +19,11 @@ int main(void)
 {
 	//--------Zanix Engine--------	
 	
-	ZWindow::CreateZWindow(500, 500, "toto");
+	Window::CreateZWindow(500, 500, "toto");
 	
-	ZRenderer::Initialize();
+	Renderer::Initialize();
 
-	ZCommandBuffers::CreateCommandBuffers();
+	CommandBuffers::CreateCommandBuffers();
 
 	system("PAUSE");
   
