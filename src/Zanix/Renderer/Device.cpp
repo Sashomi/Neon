@@ -25,26 +25,26 @@ namespace Zx
 	*/
 	void Device::DestroyDevice()
 	{
-		if (s_logicalDevice != VK_NULL_HANDLE)
+		if (s_devices->logicalDevice != VK_NULL_HANDLE)
 		{
-			vkDeviceWaitIdle(s_logicalDevice);
+			vkDeviceWaitIdle(s_devices->logicalDevice);
 			
-			if (s_imageAvailableSemaphore != VK_NULL_HANDLE)
+			if (s_devices->imageAvailableSemaphore != VK_NULL_HANDLE)
 			{
-				vkDestroySemaphore(s_logicalDevice, s_imageAvailableSemaphore, nullptr);
+				vkDestroySemaphore(s_devices->logicalDevice, s_devices->imageAvailableSemaphore, nullptr);
 			}
 
-			if (s_renderingFinishedSemaphore != VK_NULL_HANDLE)
+			if (s_devices->renderingFinishedSemaphore != VK_NULL_HANDLE)
 			{
-				vkDestroySemaphore(s_logicalDevice, s_renderingFinishedSemaphore, nullptr);
+				vkDestroySemaphore(s_devices->logicalDevice, s_devices->renderingFinishedSemaphore, nullptr);
 			}
 
 			if (SwapChain::GetSwapChain() != VK_NULL_HANDLE)
 			{
-				vkDestroySwapchainKHR(s_logicalDevice, SwapChain::GetSwapChain(), nullptr);
+				vkDestroySwapchainKHR(s_devices->logicalDevice, SwapChain::GetSwapChain()->swapChain, nullptr);
 			}
 
-			vkDestroyDevice(s_logicalDevice, nullptr);
+			vkDestroyDevice(s_devices->logicalDevice, nullptr);
 
 			if (Window::GetSurface() != VK_NULL_HANDLE)
 			{
@@ -58,72 +58,16 @@ namespace Zx
 	*/
 	void Device::GetDeviceQueue()
 	{
-		vkGetDeviceQueue(s_logicalDevice, s_graphicsIndexFamily, 0, &s_graphicsQueue);
-		vkGetDeviceQueue(s_logicalDevice, s_presentIndexFamily, 0, &s_presentQueue);
+		vkGetDeviceQueue(s_devices->logicalDevice, s_devices->graphicsIndexFamily, 0, &s_devices->graphicsQueue);
+		vkGetDeviceQueue(s_devices->logicalDevice, s_devices->presentIndexFamily, 0, &s_devices->presentQueue);
 	}
 
 	/*
-	@brief : Gets the logical device
+	@brief : Returns the structure who countains the device's variables
 	*/
-	const VkDevice& Device::GetLogicalDevice()
+	const std::shared_ptr <Device::Devices>& Device::GetDevices()
 	{
-		return s_logicalDevice;
-	}
-	
-	/*
-	@brief : Gets the physical device
-	*/
-	const VkPhysicalDevice& Device::GetPhysicalDevice()
-	{
-		return s_physicalDevice;
-	}
-
-	/*
-	@brief : Gets the image available semaphore
-	*/
-	const VkSemaphore& Device::GetImageAvailableSemaphore()
-	{
-		return s_imageAvailableSemaphore;
-	}
-
-	/*
-	@brief : Gets the rendering (finished) semaphore
-	*/
-	const VkSemaphore& Device::GetRenderingFinishedSemaphore()
-	{
-		return s_renderingFinishedSemaphore;
-	}
-
-	/*
-	@brief : Gets the presentation queue
-	*/
-	const VkQueue& Device::GetPresentQueue()
-	{
-		return s_presentQueue;
-	}
-
-	/*
-	@brief : Gets the graphics queue
-	*/
-	const VkQueue& Device::GetGraphicsQueue()
-	{
-		return s_graphicsQueue;
-	}
-
-	/*
-	@brief : Gets the index of the presentation family queue
-	*/
-	uint32_t Device::GetPresentIndexFamilyQueue()
-	{
-		return s_presentIndexFamily;
-	}
-
-	/*
-	@brief : Gets the index of the graphics family queue
-	*/
-	uint32_t Device::GetGraphicsIndexFamilyQueue()
-	{
-		return s_graphicsIndexFamily;
+		return s_devices;
 	}
 
 	//-------------------------Private method-------------------------
@@ -149,7 +93,7 @@ namespace Zx
 
 		// On récupère le meilleur GPU
 		if (devicesMap.rbegin()->first > 0)
-			s_physicalDevice = devicesMap.rbegin()->second;
+			s_devices->physicalDevice = devicesMap.rbegin()->second;
 		else
 			throw ZOperationFailed(__FILE__, "Failed to find a suitable GPU");
 	}
@@ -204,13 +148,13 @@ namespace Zx
 		
 			if ((queueFamilyProperties[i].queueCount > 0) && (queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT))
 			{
-				if (s_graphicsIndexFamily == UINT32_MAX)
+				if (s_devices->graphicsIndexFamily == UINT32_MAX)
 					graphicsIndexFamily = i;
 
 				if (queuePresentSupport[i])
 				{
-					s_graphicsIndexFamily = i;
-					s_presentIndexFamily = i;
+					s_devices->graphicsIndexFamily = i;
+					s_devices->presentIndexFamily = i;
 					return true;
 				}
 			}
@@ -228,8 +172,8 @@ namespace Zx
 		if (graphicsIndexFamily == UINT32_MAX || presentIndexFamily == UINT32_MAX)
 			return false;
 
-		s_graphicsIndexFamily = graphicsIndexFamily;
-		s_presentIndexFamily = presentIndexFamily;
+		s_devices->graphicsIndexFamily = graphicsIndexFamily;
+		s_devices->presentIndexFamily = presentIndexFamily;
 
 		return true;
 	}
@@ -246,19 +190,19 @@ namespace Zx
 			VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
 			nullptr,
 			0,
-			s_graphicsIndexFamily,
+			s_devices->graphicsIndexFamily,
 			static_cast<uint32_t>(queuePriorities.size()),
 			queuePriorities.data()
 		});
 
-		if (s_graphicsIndexFamily != s_presentIndexFamily)
+		if (s_devices->graphicsIndexFamily != s_devices->presentIndexFamily)
 		{
 			deviceQueueInfo.push_back(
 			{
 				VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
 				nullptr,
 				0,
-				s_presentIndexFamily,
+				s_devices->presentIndexFamily,
 				static_cast<uint32_t>(queuePriorities.size()),
 				queuePriorities.data()
 			});
@@ -283,7 +227,7 @@ namespace Zx
 			nullptr
 		};
 
-		if (vkCreateDevice(s_physicalDevice, &deviceInfo, nullptr, &s_logicalDevice) != VK_SUCCESS)
+		if (vkCreateDevice(s_devices->physicalDevice, &deviceInfo, nullptr, &s_devices->logicalDevice) != VK_SUCCESS)
 			throw ZOperationFailed(__FILE__, "Failed to create a logical device.");
 	}
 
@@ -298,8 +242,8 @@ namespace Zx
 			0
 		};
 
-		if ((vkCreateSemaphore(s_logicalDevice, &semaphoreInfo, nullptr, &s_imageAvailableSemaphore) != VK_SUCCESS) 
-			|| (vkCreateSemaphore(s_logicalDevice, &semaphoreInfo, nullptr, &s_renderingFinishedSemaphore) != VK_SUCCESS))
+		if ((vkCreateSemaphore(s_devices->logicalDevice, &semaphoreInfo, nullptr, &s_devices->imageAvailableSemaphore) != VK_SUCCESS)
+			|| (vkCreateSemaphore(s_devices->logicalDevice, &semaphoreInfo, nullptr, &s_devices->renderingFinishedSemaphore) != VK_SUCCESS))
 			throw ZOperationFailed(__FILE__, "Failed to create semaphore");
 	}
 
@@ -308,10 +252,10 @@ namespace Zx
 	bool Device::IsExtensionAvailable()
 	{
 		uint32_t extensionsCount = 0;
-		vkEnumerateDeviceExtensionProperties(s_physicalDevice, nullptr, &extensionsCount, nullptr);
+		vkEnumerateDeviceExtensionProperties(s_devices->physicalDevice, nullptr, &extensionsCount, nullptr);
 
 		std::vector<VkExtensionProperties> extensionsAvailable(extensionsCount);
-		vkEnumerateDeviceExtensionProperties(s_physicalDevice, nullptr, &extensionsCount, extensionsAvailable.data());
+		vkEnumerateDeviceExtensionProperties(s_devices->physicalDevice, nullptr, &extensionsCount, extensionsAvailable.data());
 
 		std::vector<const char*> deviceExtensions =
 		{
@@ -332,12 +276,5 @@ namespace Zx
 
 	//-------------------------------------------------------------------------
 
-	VkDevice Device::s_logicalDevice = VK_NULL_HANDLE;
-	VkPhysicalDevice Device::s_physicalDevice = VK_NULL_HANDLE;
-	uint32_t Device::s_graphicsIndexFamily = UINT32_MAX;
-	uint32_t Device::s_presentIndexFamily = UINT32_MAX;
-	VkQueue Device::s_graphicsQueue = VK_NULL_HANDLE;
-	VkQueue Device::s_presentQueue = VK_NULL_HANDLE;
-	VkSemaphore Device::s_imageAvailableSemaphore = VK_NULL_HANDLE;
-	VkSemaphore Device::s_renderingFinishedSemaphore = VK_NULL_HANDLE;
+	std::shared_ptr<Device::Devices> Device::s_devices = std::make_shared<Device::Devices>();
 }

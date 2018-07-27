@@ -2,24 +2,37 @@
 #define ZSWAPCHAIN_HPP
 
 #include <vector>
+#include <memory>
 #include <vulkan/vulkan.h>
 
 namespace Zx
 {
 	class SwapChain
 	{
+		struct SwapChains;
+
 	public:
 		static bool CreateSwapChain();
 
-		static const VkSwapchainKHR& GetSwapChain();
+		static const std::shared_ptr<SwapChains>& GetSwapChain();
 	private:
-		static VkSwapchainKHR s_swapChain;
-		static VkExtent2D s_swapChainExtent;
-		static VkFormat s_swapChainImageFormat;
-		static std::vector<VkImage> s_swapChainImages;
-		static std::vector<VkImageView> s_swapChainImagesView;
+
+		static std::shared_ptr<SwapChains> s_swapChain;
 
 		static bool s_isRenderAvailable;
+
+		struct SwapChains
+		{
+			inline SwapChains() : swapChain(VK_NULL_HANDLE), extent({ 0, 0}), format(VK_FORMAT_UNDEFINED), image(), imageView()
+			{
+			}
+
+			VkSwapchainKHR swapChain;
+			VkExtent2D extent;
+			VkFormat format;
+			std::vector<VkImage> image;
+			std::vector<VkImageView> imageView;
+		};
 
 	private:
 		static void CreateSwapChainImageView();
@@ -30,9 +43,6 @@ namespace Zx
 		static VkImageUsageFlags GetSwapChainUsageFlags(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
 		static VkSurfaceTransformFlagBitsKHR GetSwapChainTransform(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
 		static VkPresentModeKHR GetSwapChainPresentMode(const std::vector<VkPresentModeKHR>& presentModes);
-
-		static std::vector<VkImage> BuildVectorVkImage();
-		static std::vector<VkImageView> BuildVectorVkImageView();
 	};
 }
 

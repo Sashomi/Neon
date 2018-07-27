@@ -17,14 +17,14 @@ namespace Zx
 			VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
 			nullptr,
 			0,
-			Device::GetPresentIndexFamilyQueue()
+			Device::GetDevices()->presentIndexFamily
 		};
 
-		if (vkCreateCommandPool(Device::GetLogicalDevice(), &commandPoolCreateInfo, nullptr, &s_commandPool) != VK_SUCCESS)
+		if (vkCreateCommandPool(Device::GetDevices()->logicalDevice, &commandPoolCreateInfo, nullptr, &s_commandPool) != VK_SUCCESS)
 			throw ZOperationFailed(__FILE__, "Failed to create command pool");
 
 		uint32_t imageCount = 0;
-		if (vkGetSwapchainImagesKHR(Device::GetLogicalDevice(), SwapChain::GetSwapChain(), &imageCount, nullptr) != VK_SUCCESS)
+		if (vkGetSwapchainImagesKHR(Device::GetDevices()->logicalDevice, SwapChain::GetSwapChain()->swapChain, &imageCount, nullptr) != VK_SUCCESS)
 			throw ZOperationFailed(__FILE__, "Could not get the number of swap chain images");
 
 		s_presentQueueCommandBuffers.resize(imageCount);
@@ -38,7 +38,7 @@ namespace Zx
 			imageCount
 		};
 
-		if (vkAllocateCommandBuffers(Device::GetLogicalDevice(), &commandBufferAllocateInfo, &s_presentQueueCommandBuffers[0]) != VK_SUCCESS)
+		if (vkAllocateCommandBuffers(Device::GetDevices()->logicalDevice, &commandBufferAllocateInfo, &s_presentQueueCommandBuffers[0]) != VK_SUCCESS)
 			throw ZOperationFailed(__FILE__, "Failed to allocate command buffers");
 
 		if (!RecordCommandsBuffers())
@@ -50,17 +50,17 @@ namespace Zx
 	*/
 	void CommandBuffers::DestroyRessources()
 	{
-		if (Device::GetLogicalDevice() != VK_NULL_HANDLE) {
-			vkDeviceWaitIdle(Device::GetLogicalDevice());
+		if (Device::GetDevices()->logicalDevice != VK_NULL_HANDLE) {
+			vkDeviceWaitIdle(Device::GetDevices()->logicalDevice);
 
 			if ((CommandBuffers::GetPresentQueueCommandBuffers().size() > 0) && (CommandBuffers::GetPresentQueueCommandBuffers().data() != VK_NULL_HANDLE)) {
-				vkFreeCommandBuffers(Device::GetLogicalDevice(), CommandBuffers::GetCommandPool(), static_cast<uint32_t>(CommandBuffers::GetPresentQueueCommandBuffers().size()), CommandBuffers::GetPresentQueueCommandBuffers().data());
+				vkFreeCommandBuffers(Device::GetDevices()->logicalDevice, CommandBuffers::GetCommandPool(), static_cast<uint32_t>(CommandBuffers::GetPresentQueueCommandBuffers().size()), CommandBuffers::GetPresentQueueCommandBuffers().data());
 				std::vector<VkCommandBuffer> cmdBuf = CommandBuffers::GetPresentQueueCommandBuffers();
 				cmdBuf.clear();
 			}
 
 			if (CommandBuffers::GetCommandPool() != VK_NULL_HANDLE) {
-				vkDestroyCommandPool(Device::GetLogicalDevice(), CommandBuffers::GetCommandPool(), nullptr);
+				vkDestroyCommandPool(Device::GetDevices()->logicalDevice, CommandBuffers::GetCommandPool(), nullptr);
 				VkCommandPool cmd = CommandBuffers::GetCommandPool();
 				cmd = VK_NULL_HANDLE;
 			}
@@ -99,7 +99,7 @@ namespace Zx
 		uint32_t image_count = static_cast<uint32_t>(s_presentQueueCommandBuffers.size());
 
 		std::vector<VkImage> swap_chain_images(image_count);
-		if (vkGetSwapchainImagesKHR(Device::GetLogicalDevice(), SwapChain::GetSwapChain(), &image_count, &swap_chain_images[0]) != VK_SUCCESS) {
+		if (vkGetSwapchainImagesKHR(Device::GetDevices()->logicalDevice, SwapChain::GetSwapChain()->swapChain, &image_count, &swap_chain_images[0]) != VK_SUCCESS) {
 			throw ZOperationFailed(__FILE__, "Could not get swap chain images");	
 		}
 
@@ -131,8 +131,8 @@ namespace Zx
 				VK_ACCESS_TRANSFER_WRITE_BIT,
 				VK_IMAGE_LAYOUT_UNDEFINED,
 				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				Device::GetPresentIndexFamilyQueue() ,
-				Device::GetPresentIndexFamilyQueue(),
+				Device::GetDevices()->presentIndexFamily,
+				Device::GetDevices()->presentIndexFamily,
 				swap_chain_images[i],
 				image_subresource_range
 			};
@@ -144,8 +144,8 @@ namespace Zx
 				VK_ACCESS_MEMORY_READ_BIT,
 				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-				Device::GetPresentIndexFamilyQueue(),
-				Device::GetPresentIndexFamilyQueue(),
+				Device::GetDevices()->presentIndexFamily,
+				Device::GetDevices()->presentIndexFamily,
 				swap_chain_images[i],
 				image_subresource_range
 			};

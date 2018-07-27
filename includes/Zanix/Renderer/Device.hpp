@@ -1,12 +1,15 @@
 #ifndef ZDEVICE_HPP
 #define ZDEVICE_HPP
 
+#include <memory>
 #include <vulkan/vulkan.h>
 
 namespace Zx
 {
 	class Device
 	{
+		struct Devices;
+
 	public:
 		Device() = default;
 		~Device() = delete;
@@ -16,25 +19,28 @@ namespace Zx
 
 		static void GetDeviceQueue();
 
-		static const VkDevice& GetLogicalDevice();
-		static const VkPhysicalDevice& GetPhysicalDevice();
-		static const VkSemaphore& GetImageAvailableSemaphore();
-		static const VkSemaphore& GetRenderingFinishedSemaphore();
-		static const VkQueue& GetPresentQueue();
-		static const VkQueue& GetGraphicsQueue();
-
-		static uint32_t GetPresentIndexFamilyQueue();
-		static uint32_t GetGraphicsIndexFamilyQueue();
+		static const std::shared_ptr<Devices>& GetDevices();
 
 	private:
-		static VkDevice s_logicalDevice;
-		static VkPhysicalDevice s_physicalDevice;
-		static uint32_t s_graphicsIndexFamily;
-		static uint32_t s_presentIndexFamily;
-		static VkQueue s_graphicsQueue;
-		static VkQueue s_presentQueue;
-		static VkSemaphore s_renderingFinishedSemaphore;
-		static VkSemaphore s_imageAvailableSemaphore;
+		
+		static std::shared_ptr<Devices> s_devices;
+
+		struct Devices
+		{
+			inline Devices() : logicalDevice(VK_NULL_HANDLE), physicalDevice(VK_NULL_HANDLE), graphicsIndexFamily(UINT32_MAX),
+				presentIndexFamily(UINT32_MAX), graphicsQueue(VK_NULL_HANDLE), presentQueue(VK_NULL_HANDLE),
+				renderingFinishedSemaphore(VK_NULL_HANDLE), imageAvailableSemaphore(VK_NULL_HANDLE)
+			{}
+
+			VkDevice logicalDevice;
+			VkPhysicalDevice physicalDevice;
+			uint32_t graphicsIndexFamily;
+			uint32_t presentIndexFamily;
+			VkQueue graphicsQueue;
+			VkQueue presentQueue;
+			VkSemaphore renderingFinishedSemaphore;
+			VkSemaphore imageAvailableSemaphore;
+		};
 
 	private:
 		static void FoundPhysicalDevice();
