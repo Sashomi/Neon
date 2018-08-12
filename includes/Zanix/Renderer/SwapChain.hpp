@@ -7,25 +7,45 @@
 
 namespace Zx
 {
+	class Window;
+	class Device;
+
 	class SwapChain
 	{
 		struct SwapChains;
 
 	public:
-		static bool CreateSwapChain();
+		SwapChain() = default;
+		SwapChain(const Device& device, const Window& window);
+		SwapChain(const SwapChain& swapChain);
+		SwapChain(SwapChain&& swapChain) noexcept;
 
-		static const std::shared_ptr<SwapChains>& GetSwapChain();
+		~SwapChain() = default;
+
+		bool CreateSwapChain();
+
+		SwapChain& operator=(SwapChain&& swapChain) noexcept;
+
+	public:
+		inline bool IsRenderAvailable() const
+		{
+			return m_isRenderAvailable;
+		}
+
+		inline const std::shared_ptr<SwapChains>& GetSwapChain() const
+		{
+			return m_swapChain;
+		}
+
 	private:
-
-		static std::shared_ptr<SwapChains> s_swapChain;
-
-		static bool s_isRenderAvailable;
+		std::shared_ptr<SwapChains> m_swapChain;
+		std::shared_ptr<Device> m_device;
+		std::shared_ptr<Window> m_window;
 
 		struct SwapChains
 		{
-			inline SwapChains() : swapChain(VK_NULL_HANDLE), extent({ 0, 0}), format(VK_FORMAT_UNDEFINED), image(), imageView()
-			{
-			}
+			inline SwapChains() : swapChain(VK_NULL_HANDLE), extent({ 0, 0 }), format(VK_FORMAT_UNDEFINED), image(), imageView()
+			{}
 
 			VkSwapchainKHR swapChain;
 			VkExtent2D extent;
@@ -34,15 +54,17 @@ namespace Zx
 			std::vector<VkImageView> imageView;
 		};
 
-	private:
-		static void CreateSwapChainImageView();
+		bool m_isRenderAvailable;
 
-		static uint32_t GetSwapChainNumImages(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
-		static VkSurfaceFormatKHR GetSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& surfaceFormats);
-		static VkExtent2D GetSwapChainExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
-		static VkImageUsageFlags GetSwapChainUsageFlags(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
-		static VkSurfaceTransformFlagBitsKHR GetSwapChainTransform(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
-		static VkPresentModeKHR GetSwapChainPresentMode(const std::vector<VkPresentModeKHR>& presentModes);
+	private:
+		bool CreateSwapChainImageView();
+
+		uint32_t GetSwapChainNumImages(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
+		VkSurfaceFormatKHR GetSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& surfaceFormats);
+		VkExtent2D GetSwapChainExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
+		VkImageUsageFlags GetSwapChainUsageFlags(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
+		VkSurfaceTransformFlagBitsKHR GetSwapChainTransform(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
+		VkPresentModeKHR GetSwapChainPresentMode(const std::vector<VkPresentModeKHR>& presentModes);
 	};
 }
 

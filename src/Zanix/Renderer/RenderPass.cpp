@@ -1,34 +1,62 @@
-#include <Zanix/Core/Exception.hpp>
+#include <Zanix/Core/File.hpp>
+#include <Zanix/Core/SmartDeleter.hpp>
 #include <Zanix/Renderer/SwapChain.hpp>
 #include <Zanix/Renderer/Device.hpp>
 #include <Zanix/Renderer/RenderPass.hpp>
 
 namespace Zx
 {
-	void RenderPass::CreateRenderPass()
+	/*
+	@brief : Constructor with the needed informations
+	@param : The device of the application
+	@param : The swapChain of the application
+	*/
+	RenderPass::RenderPass(const Device& device, const SwapChain& swapChain)
 	{
+		m_device = std::make_shared<Device>(device);
+		m_swapChain = std::make_shared<SwapChain>(swapChain);
+		m_renderPass = std::make_shared<RenderPasss>();
+	}
 
+	/*
+	@brief : Copy constructor
+	@param : A constant reference to the RenderPass to copy
+	*/
+	RenderPass::RenderPass(const RenderPass& rend) : m_swapChain(rend.m_swapChain), m_device(rend.m_device), m_renderPass(rend.m_renderPass)
+	{}
+
+	/*
+	@brief : Creates a render pass
+	@return : Returns true if the creation is a success, false otherwise
+	*/
+	bool RenderPass::CreateRenderPass()
+	{
 		VkAttachmentDescription attachmentDescription[] =
 		{
+			{
 			0,
-			SwapChain::GetSwapChain()->format,
+			m_swapChain->GetSwapChain()->format,
 			VK_SAMPLE_COUNT_1_BIT, // nombre d'échantillon(s) de l'image
 			VK_ATTACHMENT_LOAD_OP_CLEAR,
 			VK_ATTACHMENT_STORE_OP_STORE,
 			VK_ATTACHMENT_LOAD_OP_DONT_CARE,
 			VK_ATTACHMENT_STORE_OP_DONT_CARE,
-			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+			}
 		};
-
+		
 		VkAttachmentReference colorAttachmentReference[] =
 		{
+			{
 			0,
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+			}
 		};
 
 		VkSubpassDescription subpassDescription[] =
 		{
+			{
 			0,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			0,
@@ -39,6 +67,7 @@ namespace Zx
 			nullptr,
 			0,
 			nullptr
+			}
 		};
 
 		VkRenderPassCreateInfo renderPassCreateInfo =
@@ -54,34 +83,72 @@ namespace Zx
 			nullptr
 		};
 
-		if (vkCreateRenderPass(Device::GetDevices()->logicalDevice, &renderPassCreateInfo, nullptr, &s_renderPass->renderPass) != VK_SUCCESS)
-			throw ZOperationFailed(__FILE__, "Failed to create a render pass");
+		if (vkCreateRenderPass(m_device->GetDevice()->logicalDevice, &renderPassCreateInfo, nullptr, &m_renderPass->renderPass) != VK_SUCCESS)
+		{
+			std::cout << "Failed to create render pass" << std::endl;
+			return false;
+		}
+
+		return true;
 	}
 
-	void RenderPass::CreateFramebuffer()
+	/*
+	@brief : Creates a framebuffer
+	@param : Returns true if the creation is a success, false otherwise
+	*/
+	bool RenderPass::CreateFramebuffer()
 	{
-		const std::vector<VkImageView> &swapChainImage = SwapChain::GetSwapChain()->imageView;
-		s_renderPass->framebuffer.resize(swapChainImage.size());
+		m_renderPass->framebuffer.resize(m_swapChain->GetSwapChain()->imageView.size());
 
-		for (std::size_t i = 0; i < s_renderPass->framebuffer.size(); i++)
+		for (std::size_t i = 0; i < m_swapChain->GetSwapChain()->imageView.size(); i++)
 		{
+			VkImageView attachments[] =
+			{
+				m_swapChain->GetSwapChain()->imageView[i]
+			};
+
 			VkFramebufferCreateInfo frameBufferCreateInfo =
 			{
 				VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
 				nullptr,
 				0,
-				s_renderPass->renderPass,
+				m_renderPass->renderPass,
 				1,
-				&swapChainImage[i],
+				attachments,
 				300,
 				300,
 				1
 			};
 
-			if (vkCreateFramebuffer(Device::GetDevices()->logicalDevice, &frameBufferCreateInfo, nullptr, &s_renderPass->framebuffer[i]) != VK_SUCCESS)
-				throw ZOperationFailed(__FILE__, "Failed to create framebuffer");
+			if (vkCreateFramebuffer(m_device->GetDevice()->logicalDevice, &frameBufferCreateInfo, nullptr, &m_renderPass->framebuffer[i]) != VK_SUCCESS)
+			{
+				std::cout << "Failed to create frame buffer" << std::endl;
+				return false;
+			}
 		}
+
+		return true;
 	}
 
-	std::shared_ptr<RenderPass::RenderPasss> RenderPass::s_renderPass = std::make_shared<RenderPass::RenderPasss>();
+	/*
+	@brief : Destroys a render pass
+	*/
+	void RenderPass::DestroyRenderPass()
+	{
+		vkDestroyRenderPass(m_device->GetDevice()->logicalDevice, m_renderPass->renderPass, nullptr);
+		m_renderPass->renderPass = VK_NULL_HANDLE;
+	}
+
+	/*
+	@brief : Destroys framebuffers
+	*/
+	void RenderPass::DestroyFrameBuffer()
+	{
+		for (size_t i = 0; i < m_renderPass->framebuffer.size(); ++i) {
+			if (m_renderPass->framebuffer[i] != VK_NULL_HANDLE) {
+				vkDestroyFramebuffer(m_device->GetDevice()->logicalDevice, m_renderPass->framebuffer[i], nullptr);
+				m_renderPass->framebuffer[i] = VK_NULL_HANDLE;
+			}
+		}
+	}
 }

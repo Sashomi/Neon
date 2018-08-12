@@ -6,24 +6,42 @@
 
 namespace Zx
 {
+	class SwapChain;
+	class Window;
+	class Renderer;
+
 	class Device
 	{
 		struct Devices;
 
 	public:
 		Device() = default;
-		~Device() = delete;
+		Device(const Renderer& renderer, const SwapChain& swapChain, const Window& window);
+		Device(const Device& device);
+		Device(Device&& device) noexcept;
 
-		static void CreateDevice();
-		static void DestroyDevice();
+		~Device() = default;
 
-		static void GetDeviceQueue();
+		bool CreateDevice();
+		bool CreateSemaphores();
 
-		static const std::shared_ptr<Devices>& GetDevices();
+		void DestroyDevice();
+
+		void GetDeviceQueue();
+
+		Device& operator=(Device&& device) noexcept;
+
+	public:
+		inline const std::shared_ptr<Devices>& GetDevice() const
+		{
+			return m_device;
+		}
 
 	private:
-		
-		static std::shared_ptr<Devices> s_devices;
+		std::shared_ptr<Devices> m_device;
+		std::shared_ptr<Renderer> m_renderer;
+		std::shared_ptr<Window> m_window;
+		std::shared_ptr<SwapChain> m_swapChain;
 
 		struct Devices
 		{
@@ -43,15 +61,14 @@ namespace Zx
 		};
 
 	private:
-		static void FoundPhysicalDevice();
-		static int GetGPUScore(const VkPhysicalDevice& device);
+		bool FoundPhysicalDevice();
+		int GetGPUScore(const VkPhysicalDevice& device);
 
-		static void CreateLogicalDevice();
-		static void CreateSemaphores();
+		bool CreateLogicalDevice();
 
-		static bool CheckFamilyQueue(const VkPhysicalDevice& device);
+		bool CheckFamilyQueue(const VkPhysicalDevice& device);
 
-		static bool IsExtensionAvailable();
+		bool IsExtensionAvailable();
 	};
 }
 

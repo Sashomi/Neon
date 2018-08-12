@@ -1,18 +1,40 @@
 #ifndef RENDERPASS_HPP
 #define RENDERPASS_HPP
 
+#include <memory>
+
 namespace Zx
 {
+	class Device;
+	class SwapChain;
+
 	class RenderPass
 	{
-	public:
-		static void CreateRenderPass();
-		static void CreateFramebuffer();
-
-	private:
 		struct RenderPasss;
 
-		static std::shared_ptr<RenderPasss> s_renderPass;
+	public:
+		RenderPass() = default;
+		RenderPass(const Device& device, const SwapChain& swapChain);
+		RenderPass(const RenderPass& renderPass);
+
+		~RenderPass() = default;
+
+		bool CreateRenderPass();
+		bool CreateFramebuffer();
+
+		void DestroyRenderPass();
+		void DestroyFrameBuffer();
+
+	public:
+		inline const std::shared_ptr<RenderPasss>& GetRenderPass() const
+		{
+			return m_renderPass;
+		}
+
+	private:
+		std::shared_ptr<SwapChain> m_swapChain;
+		std::shared_ptr<Device> m_device;
+		std::shared_ptr<RenderPasss> m_renderPass;
 
 		struct RenderPasss
 		{
@@ -22,7 +44,6 @@ namespace Zx
 			VkRenderPass renderPass;
 			std::vector<VkFramebuffer> framebuffer;
 		};
-	private:
 	};
 }
 

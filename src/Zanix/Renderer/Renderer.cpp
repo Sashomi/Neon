@@ -1,13 +1,18 @@
 #include <vector>
 
 #include <Zanix/Core/Exception.hpp>
-#include <Zanix/Renderer/Device.hpp>
 #include <Zanix/ZUtils.hpp>
 #include <Zanix/Renderer/Window.hpp>
-#include <Zanix/Renderer/CommandBuffers.hpp>
+#include <Zanix/Renderer/Device.hpp>
 #include <Zanix/Renderer/SwapChain.hpp>
+#include <Zanix/Renderer/CommandBuffers.hpp>
 #include <Zanix/Renderer/Renderer.hpp>
 
+#ifdef ZDEBUG
+	#define VALIDATIONS_LAYERS
+#else
+	#undef VALIDATIONS_LAYERS
+#endif
 
 namespace Zx
 {
@@ -23,41 +28,88 @@ namespace Zx
 		#endif
 	};
 
+	const std::vector<const char*> validationLayers = {
+		"VK_LAYER_LUNARG_standard_validation"
+	};
+
+	//------------------------------------------------
+
+	/*
+	@brief : Constructor with the needed informations
+	@param : The device of the application
+	*/
+	Renderer::Renderer(const Device& device) : m_instance(VK_NULL_HANDLE), m_callback(VK_NULL_HANDLE)
+	{
+		m_device = std::make_shared<Device>(device);
+	}
+
+	/*
+	@brief : Copy constructor
+	@param : A constant reference to the Renderer to copy
+	*/
+	Renderer::Renderer(const Renderer& renderer)
+	{
+		m_instance = renderer.m_instance;
+		m_device = renderer.m_device;
+		m_callback = renderer.m_callback;
+	}
+	
 	/*
 	@brief : Initialize Vulkan API
+	@return : Returns true if the initialization of the vulkan API is a success, false otherwise
 	*/
-	void Renderer::Initialize()
+	bool Renderer::Initialize(Window& window, Device& device, SwapChain& swapChain)
 	{
-		CreateInstance();
-		Window::CreatePresentationSurface();
-		Device::CreateDevice();
-		SwapChain::CreateSwapChain();
+		if (!(CreateInstance()))
+			return false;
+
+		if (!SetupDebugCallback())
+			return false;
+
+		window.SetVkInstance(m_instance);
+			
+		if (!(window.CreatePresentationSurface()))
+			return false;
+
+		Device d(*this, swapChain, window);
+		device = std::move(d);
+			
+		if (!(device.CreateDevice()))
+			return false;
+
+		SwapChain swap(device, window);
+		swapChain = std::move(swap);
+
+		if (!(swapChain.CreateSwapChain()))
+			return false;
+
+		return true;
 	}
 
 	/*
-	@brief : Destroys command buffers ressources, the device, and destroys vulkan instance
+	@brief : Destroys the vulkan instance
 	*/
-	void Renderer::Destroy()
+	void Renderer::DestroyRenderer()
 	{
-		CommandBuffers::DestroyRessources();
-		Device::DestroyDevice();
 		DestroyInstance();
-	}
-
-	/*
-	@brief : Returns the vulkan instance
-	*/
-	const VkInstance& Renderer::GetVulkanInstance()
-	{
-		return s_instance;
 	}
 
 	//-------------------------Private method-------------------------
 
-	void Renderer::CreateInstance()
+	bool Renderer::CreateInstance()
 	{
+		#ifdef VALIDATIONS_LAYERS
+			if (!CheckValidationLayerSupport())
+			{
+				std::cout << "Validation layers are not support" << std::endl;
+				return false;
+			}
+
+			extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+		#endif
+
 		if (!IsExtensionAvailable())
-			throw ZOperationFailed(__FILE__, "Extensions are not available.");
+			return false;
 
 		VkApplicationInfo applicationInfo =
 		{
@@ -82,8 +134,15 @@ namespace Zx
 			extensions.data()
 		};
 
-		if (vkCreateInstance(&instanceCreateInfo, nullptr, &s_instance) != VK_SUCCESS)
-			throw ZOperationFailed(__FILE__, "Failed to create a Vulkan Instance.");
+		#ifdef VALIDATIONS_LAYERS
+			instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+			instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+		#endif
+
+		if (vkCreateInstance(&instanceCreateInfo, nullptr, &m_instance) != VK_SUCCESS)
+			return false;
+
+		return true;
 	}
 
 	//-------------------------------------------------------------------------
@@ -92,11 +151,11 @@ namespace Zx
 	{
 		uint32_t extensionsCount = 0;
 		if ((vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, nullptr) != VK_SUCCESS) || (extensionsCount == 0))
-			throw ZOperationFailed(__FILE__, "Failed to enumerate availabe extensions.");
+			return false;
 
 		std::vector<VkExtensionProperties> extensionsProperties(extensionsCount);
 		if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, extensionsProperties.data()) != VK_SUCCESS)
-			throw ZOperationFailed(__FILE__, "Failed to enumerate availabe extensions - data.");
+			return false;
 
 		for (const char* extensionName : extensions)
 		{
@@ -112,17 +171,115 @@ namespace Zx
 		return false;
 	}
 
+	//-----------------------------------------------------------------------
+
+	bool Renderer::CheckValidationLayerSupport()
+	{
+		uint32_t validationLayerCount = 0;
+		vkEnumerateInstanceLayerProperties(&validationLayerCount, nullptr);
+
+		std::vector<VkLayerProperties> valLayers(validationLayerCount);
+		vkEnumerateInstanceLayerProperties(&validationLayerCount, valLayers.data());
+
+		for (const char* layerName : validationLayers)
+		{
+			bool layerFound = false;
+			
+			for (const auto& layers : valLayers)
+			{
+				if (std::strcmp(layerName, layers.layerName) == 0)
+				{
+					layerFound = true;
+					break;
+				}
+			}
+
+			if (!layerFound)
+				return false;
+		}
+
+		return true;
+	}
+
 	//-------------------------------------------------------------------------
 
 	void Renderer::DestroyInstance()
 	{
-		if (s_instance != VK_NULL_HANDLE)
+		#ifdef VALIDATIONS_LAYERS
+				DestroyDebugCallback(m_instance, m_callback, nullptr);
+		#endif
+
+		if (m_instance != VK_NULL_HANDLE)
 		{
-			vkDestroyInstance(s_instance, nullptr);
+			vkDestroyInstance(m_instance, nullptr);
 		}
 	}
 
 	//-------------------------------------------------------------------------
 
-	VkInstance Renderer::s_instance = VK_NULL_HANDLE;
+	void Renderer::Destroy()
+	{
+		DestroyInstance();
+	}
+
+	//-------------------------------------------------------------------------
+
+	bool Renderer::SetupDebugCallback()
+	{
+		#ifndef VALIDATIONS_LAYERS 
+				return;
+		#endif
+
+		VkDebugReportCallbackCreateInfoEXT debugReportCallbackInfo =
+		{
+			VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,
+			nullptr,
+			VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT,
+			DebugCallback,
+			nullptr
+		};
+
+		if (CreateDebugReportCallbackEXT(m_instance, &debugReportCallbackInfo, nullptr, &m_callback) != VK_SUCCESS)
+		{
+			std::cout << "Failed to create debug report callback" << std::endl;
+			return false;
+		}
+		
+		return true;
+	}
+
+	VkResult Renderer::CreateDebugReportCallbackEXT(const VkInstance& instance, const VkDebugReportCallbackCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugReportCallbackEXT* pCallback)
+	{
+		auto function = (PFN_vkCreateDebugReportCallbackEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
+
+		if (function != nullptr)
+			return function(instance, pCreateInfo, pAllocator, pCallback);
+
+		return VK_ERROR_EXTENSION_NOT_PRESENT;
+	}
+
+	void Renderer::DestroyDebugCallback(const VkInstance& instance, const VkDebugReportCallbackEXT& callback, const VkAllocationCallbacks* pAllocator)
+	{
+		auto function = (PFN_vkDestroyDebugReportCallbackEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
+
+		if (function != nullptr)
+			function(instance, callback, pAllocator);
+	}
+
+	//-------------------------------------------------------------------------
+
+	VKAPI_ATTR VkBool32 VKAPI_CALL Renderer::DebugCallback(
+		VkDebugReportFlagsEXT flags,
+		VkDebugReportObjectTypeEXT objType,
+		uint64_t obj,
+		size_t location,
+		int32_t code,
+		const char* layerPrefix,
+		const char* msg,
+		void* userData) {
+
+		std::cerr << "validation layer: " << msg << std::endl;
+
+		return VK_FALSE;
+	}
 }

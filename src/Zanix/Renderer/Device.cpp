@@ -1,56 +1,60 @@
 #include <vector>
 #include <map>
 
-#include <Zanix/Renderer/Window.hpp>
 #include <Zanix/Core/Exception.hpp>
-#include <Zanix/Renderer/Renderer.hpp>
 #include <Zanix/Renderer/SwapChain.hpp>
+#include <Zanix/Renderer/Window.hpp>
+#include <Zanix/Renderer/Renderer.hpp>
 #include <Zanix/Renderer/Device.hpp>
 
 namespace Zx
 {
+
 	/*
-	@brief : Founds a physical device and gets a graphics queue
+	@brief : Constructor with the needed informations
+	@param : The Renderer of the application
+	@param : The SwapChain of the application
+	@param : The window of the Application
 	*/
-	void Device::CreateDevice()
+	Device::Device(const Renderer& renderer, const SwapChain& swapChain, const Window& window)
 	{
-		FoundPhysicalDevice();
-		CreateLogicalDevice();
-		GetDeviceQueue();
-		CreateSemaphores();
+		m_renderer = std::make_shared<Renderer>(renderer);
+		m_swapChain = std::make_shared<SwapChain>(swapChain);
+		m_window = std::make_shared<Window>(window);
+		m_device = std::make_shared<Devices>();
 	}
 
 	/*
-	@brief : Destroys device, semaphores, swap chain, and the presentation surface
+	@brief : Copy constructor
+	@param : A constant reference to the Device to copy
 	*/
-	void Device::DestroyDevice()
+	Device::Device(const Device& device) : m_renderer(device.m_renderer), m_swapChain(device.m_swapChain), m_window(device.m_window), m_device(device.m_device)
+	{}
+	
+	/*
+	@brief : Movement constructor
+	@param : A constant reference to the Device to move
+	*/
+	Device::Device(Device&& device) noexcept
 	{
-		if (s_devices->logicalDevice != VK_NULL_HANDLE)
-		{
-			vkDeviceWaitIdle(s_devices->logicalDevice);
-			
-			if (s_devices->imageAvailableSemaphore != VK_NULL_HANDLE)
-			{
-				vkDestroySemaphore(s_devices->logicalDevice, s_devices->imageAvailableSemaphore, nullptr);
-			}
+		std::swap(m_renderer, device.m_renderer);
+		std::swap(m_swapChain, device.m_swapChain);
+		std::swap(m_window, device.m_window);
+		std::swap(m_device, device.m_device);
+	}
 
-			if (s_devices->renderingFinishedSemaphore != VK_NULL_HANDLE)
-			{
-				vkDestroySemaphore(s_devices->logicalDevice, s_devices->renderingFinishedSemaphore, nullptr);
-			}
+	/*
+	@brief : Founds a physical device and gets a graphics queue
+	@return : Returns true if the creation of the device is a success, false otherwise
+	*/
+	bool Device::CreateDevice()
+	{
+		if (!(FoundPhysicalDevice()) || !(CreateLogicalDevice()))
+			return false;
 
-			if (SwapChain::GetSwapChain() != VK_NULL_HANDLE)
-			{
-				vkDestroySwapchainKHR(s_devices->logicalDevice, SwapChain::GetSwapChain()->swapChain, nullptr);
-			}
+		GetDeviceQueue();
 
-			vkDestroyDevice(s_devices->logicalDevice, nullptr);
-
-			if (Window::GetSurface() != VK_NULL_HANDLE)
-			{
-				vkDestroySurfaceKHR(Renderer::GetVulkanInstance(), Window::GetSurface(), nullptr);
-			}
-		}
+		return true;
 	}
 
 	/*
@@ -58,29 +62,91 @@ namespace Zx
 	*/
 	void Device::GetDeviceQueue()
 	{
-		vkGetDeviceQueue(s_devices->logicalDevice, s_devices->graphicsIndexFamily, 0, &s_devices->graphicsQueue);
-		vkGetDeviceQueue(s_devices->logicalDevice, s_devices->presentIndexFamily, 0, &s_devices->presentQueue);
+		vkGetDeviceQueue(m_device->logicalDevice, m_device->graphicsIndexFamily, 0, &m_device->graphicsQueue);
+		vkGetDeviceQueue(m_device->logicalDevice, m_device->presentIndexFamily, 0, &m_device->presentQueue);
 	}
 
 	/*
-	@brief : Returns the structure who countains the device's variables
+	@brief : Creates semaphores (rendering finished and image available)
+	@return : Returns true if the creation of the semaphores is a success, false otherwise
 	*/
-	const std::shared_ptr <Device::Devices>& Device::GetDevices()
+	bool Device::CreateSemaphores()
 	{
-		return s_devices;
+		VkSemaphoreCreateInfo semaphoreInfo =
+		{
+			VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+			nullptr,
+			0
+		};
+
+		if ((vkCreateSemaphore(m_device->logicalDevice, &semaphoreInfo, nullptr, &m_device->imageAvailableSemaphore) != VK_SUCCESS)
+			|| (vkCreateSemaphore(m_device->logicalDevice, &semaphoreInfo, nullptr, &m_device->renderingFinishedSemaphore) != VK_SUCCESS))
+		{
+			std::cout << "Failed to create semaphore" << std::endl;
+			return false;
+		}
+
+		return true;
+	}
+
+	/*
+	@brief : Assign a Device by move semantic
+	@param : A reference to the Device to move
+	@return : The Device to move
+	*/
+	Device& Device::operator=(Device&& device) noexcept
+	{
+		std::swap(m_renderer, device.m_renderer);
+		std::swap(m_swapChain, device.m_swapChain);
+		std::swap(m_window, device.m_window);
+		std::swap(m_device, device.m_device);
+
+		return (*this);
 	}
 
 	//-------------------------Private method-------------------------
 
-	void Device::FoundPhysicalDevice()
+	void Device::DestroyDevice()
+	{
+		if (m_device->logicalDevice != VK_NULL_HANDLE)
+		{
+			vkDeviceWaitIdle(m_device->logicalDevice);
+
+			if (m_device->imageAvailableSemaphore != VK_NULL_HANDLE)
+			{
+				vkDestroySemaphore(m_device->logicalDevice, m_device->imageAvailableSemaphore, nullptr);
+			}
+
+			if (m_device->renderingFinishedSemaphore != VK_NULL_HANDLE)
+			{
+				vkDestroySemaphore(m_device->logicalDevice, m_device->renderingFinishedSemaphore, nullptr);
+			}
+
+			if (m_swapChain->GetSwapChain()->swapChain != VK_NULL_HANDLE)
+			{
+				vkDestroySwapchainKHR(m_device->logicalDevice, m_swapChain->GetSwapChain()->swapChain, nullptr);
+			}
+
+			vkDestroyDevice(m_device->logicalDevice, nullptr);
+
+			if (m_window->GetSurface() != VK_NULL_HANDLE)
+			{
+				vkDestroySurfaceKHR(m_renderer->GetVulkanInstance(), m_window->GetSurface(), nullptr);
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------
+
+	bool Device::FoundPhysicalDevice()
 	{
 		uint32_t numDevices = 0;
-		if ((vkEnumeratePhysicalDevices(Renderer::GetVulkanInstance(), &numDevices, nullptr) != VK_SUCCESS) || (numDevices == 0))
-			throw ZOperationFailed(__FILE__, "Failed to enumerate physical device");
+		if ((vkEnumeratePhysicalDevices(m_renderer->GetVulkanInstance(), &numDevices, nullptr) != VK_SUCCESS) || (numDevices == 0))
+			return false;
 
 		std::vector<VkPhysicalDevice> physicalDevice(numDevices);
-		if(vkEnumeratePhysicalDevices(Renderer::GetVulkanInstance(), &numDevices, physicalDevice.data()) != VK_SUCCESS)
-			throw ZOperationFailed(__FILE__, "Failed to enumerate physical device - data");
+		if (vkEnumeratePhysicalDevices(m_renderer->GetVulkanInstance(), &numDevices, physicalDevice.data()) != VK_SUCCESS)
+			return false;
 
 		std::multimap<int, VkPhysicalDevice> devicesMap;
 		int score = 0;
@@ -93,9 +159,12 @@ namespace Zx
 
 		// On récupère le meilleur GPU
 		if (devicesMap.rbegin()->first > 0)
-			s_devices->physicalDevice = devicesMap.rbegin()->second;
-		else
-			throw ZOperationFailed(__FILE__, "Failed to find a suitable GPU");
+		{
+			m_device->physicalDevice = devicesMap.rbegin()->second;
+			return true;
+		}
+
+		return false;
 	}
 
 	//--------------------------------------------------------------------------
@@ -144,22 +213,22 @@ namespace Zx
 
 		for (uint32_t i = 0; i < queueFamilyCount; ++i)
 		{
-			vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, Window::GetSurface(), &queuePresentSupport[i]);
+			vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, m_window->GetSurface(), &queuePresentSupport[i]);
 		
 			if ((queueFamilyProperties[i].queueCount > 0) && (queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT))
 			{
-				if (s_devices->graphicsIndexFamily == UINT32_MAX)
+				if (m_device->graphicsIndexFamily == UINT32_MAX)
 					graphicsIndexFamily = i;
 
 				if (queuePresentSupport[i])
 				{
-					s_devices->graphicsIndexFamily = i;
-					s_devices->presentIndexFamily = i;
+					m_device->graphicsIndexFamily = i;
+					m_device->presentIndexFamily = i;
+					
 					return true;
 				}
 			}
 		}
-
 		for (uint32_t i = 0; i < queueFamilyCount; ++i)
 		{
 			if (queuePresentSupport[i])
@@ -172,15 +241,15 @@ namespace Zx
 		if (graphicsIndexFamily == UINT32_MAX || presentIndexFamily == UINT32_MAX)
 			return false;
 
-		s_devices->graphicsIndexFamily = graphicsIndexFamily;
-		s_devices->presentIndexFamily = presentIndexFamily;
+		m_device->graphicsIndexFamily = graphicsIndexFamily;
+		m_device->presentIndexFamily = presentIndexFamily;
 
 		return true;
 	}
 
 	//--------------------------------------------------------------------------
 
-	void Device::CreateLogicalDevice()
+	bool Device::CreateLogicalDevice()
 	{	
 		std::vector<VkDeviceQueueCreateInfo> deviceQueueInfo;
 		std::vector<float> queuePriorities = { 1.0f };
@@ -190,19 +259,19 @@ namespace Zx
 			VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
 			nullptr,
 			0,
-			s_devices->graphicsIndexFamily,
+			m_device->graphicsIndexFamily,
 			static_cast<uint32_t>(queuePriorities.size()),
 			queuePriorities.data()
 		});
 
-		if (s_devices->graphicsIndexFamily != s_devices->presentIndexFamily)
+		if (m_device->graphicsIndexFamily != m_device->presentIndexFamily)
 		{
 			deviceQueueInfo.push_back(
 			{
 				VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
 				nullptr,
 				0,
-				s_devices->presentIndexFamily,
+				m_device->presentIndexFamily,
 				static_cast<uint32_t>(queuePriorities.size()),
 				queuePriorities.data()
 			});
@@ -227,24 +296,10 @@ namespace Zx
 			nullptr
 		};
 
-		if (vkCreateDevice(s_devices->physicalDevice, &deviceInfo, nullptr, &s_devices->logicalDevice) != VK_SUCCESS)
-			throw ZOperationFailed(__FILE__, "Failed to create a logical device.");
-	}
+		if (vkCreateDevice(m_device->physicalDevice, &deviceInfo, nullptr, &m_device->logicalDevice) != VK_SUCCESS)
+			return false;
 
-	//--------------------------------------------------------------------------
-
-	void Device::CreateSemaphores()
-	{
-		VkSemaphoreCreateInfo semaphoreInfo =
-		{
-			VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-			nullptr,
-			0
-		};
-
-		if ((vkCreateSemaphore(s_devices->logicalDevice, &semaphoreInfo, nullptr, &s_devices->imageAvailableSemaphore) != VK_SUCCESS)
-			|| (vkCreateSemaphore(s_devices->logicalDevice, &semaphoreInfo, nullptr, &s_devices->renderingFinishedSemaphore) != VK_SUCCESS))
-			throw ZOperationFailed(__FILE__, "Failed to create semaphore");
+		return true;
 	}
 
 	//--------------------------------------------------------------------------
@@ -252,10 +307,10 @@ namespace Zx
 	bool Device::IsExtensionAvailable()
 	{
 		uint32_t extensionsCount = 0;
-		vkEnumerateDeviceExtensionProperties(s_devices->physicalDevice, nullptr, &extensionsCount, nullptr);
+		vkEnumerateDeviceExtensionProperties(m_device->physicalDevice, nullptr, &extensionsCount, nullptr);
 
 		std::vector<VkExtensionProperties> extensionsAvailable(extensionsCount);
-		vkEnumerateDeviceExtensionProperties(s_devices->physicalDevice, nullptr, &extensionsCount, extensionsAvailable.data());
+		vkEnumerateDeviceExtensionProperties(m_device->physicalDevice, nullptr, &extensionsCount, extensionsAvailable.data());
 
 		std::vector<const char*> deviceExtensions =
 		{
@@ -275,6 +330,4 @@ namespace Zx
 	}
 
 	//-------------------------------------------------------------------------
-
-	std::shared_ptr<Device::Devices> Device::s_devices = std::make_shared<Device::Devices>();
 }

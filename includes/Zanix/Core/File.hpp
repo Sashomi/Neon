@@ -4,8 +4,12 @@
 #define ZFILE_HPP
 
 #include <iostream>
+#include <vector>
+
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
+
+#include <Zanix/Core/String.hpp>
 
 namespace Zx 
 {
@@ -19,10 +23,11 @@ namespace Zx
 		String GetFilePath() const;
 		String GetFileName() const;
 		String GetFileExtension() const;
+		
+		std::vector<char> GetBinaryFileContent() const;
 
 	private :
 		boost::filesystem::path m_path;
-
 	};
 }
 

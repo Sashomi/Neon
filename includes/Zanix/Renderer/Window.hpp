@@ -2,6 +2,8 @@
 #define ZWINDOW_HPP
 
 #include <memory>
+#include <Windows.h>
+#include <vulkan/vulkan.h>
 
 #include <Zanix/ZUtils.hpp>
 
@@ -11,17 +13,46 @@
 
 namespace Zx
 {
+	class Renderer;
+	class String;
+
 	class Window
 	{
 	public:
-		static bool CreatePresentationSurface();
+		Window();
+		Window(const VkInstance& instance);
+		Window(const Window& window);
+		~Window() = default;
+
+		bool CreatePresentationSurface();
 		
-		static bool CreateZWindow(int width, int height, String title);
+		bool CreateZWindow(int width, int height, const String& title);
 
-		static const VkSurfaceKHR& GetSurface();
+	public:
+		inline void SetVkInstance(const VkInstance& instance)
+		{
+			m_instance = instance;
+			m_surfacePlatform->SetVkInstance(instance);
+		}
 
+		inline const VkSurfaceKHR& GetSurface() const
+		{
+			return m_surfacePlatform->GetSurface();
+		}
+
+		inline const HWND& GetHandle() const
+		{
+			return m_surfacePlatform->GetHandle();
+		}
+
+		inline const HINSTANCE& GetInstance() const
+		{
+			return m_surfacePlatform->GetInstance();
+		}
+		
 	private:
-		static std::unique_ptr<Platform> s_surfacePlatform;
+		VkInstance m_instance;
+		std::shared_ptr<Platform> m_surfacePlatform;
 	};
 }
 

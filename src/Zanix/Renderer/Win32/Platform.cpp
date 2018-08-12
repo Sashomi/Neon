@@ -1,3 +1,4 @@
+#include <Zanix/Core/String.hpp>
 #include <Zanix/Core/Exception.hpp>
 #include <Zanix/Renderer/Renderer.hpp>
 #include <Zanix/Renderer/Device.hpp>
@@ -26,9 +27,24 @@ namespace Zx
 		return 0;
 	}
 
+	//---------------------------------------------------------------------
+
+	/*
+	@brief : Constructors of the Window OS
+	@param : The VkInstance of the application
+	*/
+	Platform::Platform(const VkInstance& instance) : m_windowHandle(nullptr), m_windowInstance(nullptr), m_windowSurface(VK_NULL_HANDLE)
+	{
+		m_instance = instance;
+	}
+
+	/*
+	@brief : Creates a window for Window OS
+	@return : Returns true if the creation of the window is a success, false otherwise
+	*/
 	bool Platform::CreateZWindow(int width, int height, const String& title)
 	{
-		s_windowInstance = GetModuleHandle(nullptr);
+		m_windowInstance = GetModuleHandle(nullptr);
 
 		WNDCLASSEX wcex;
 
@@ -38,7 +54,7 @@ namespace Zx
 		wcex.lpfnWndProc = WndProc;
 		wcex.cbClsExtra = 0;
 		wcex.cbWndExtra = 0;
-		wcex.hInstance = s_windowInstance;
+		wcex.hInstance = m_windowInstance;
 		wcex.hIcon = nullptr;
 		wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
 		wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
@@ -50,14 +66,18 @@ namespace Zx
 			return false;
 		}
 
-		s_windowHandle = CreateWindow("Zanix Engine", title.GetPtr(), WS_OVERLAPPEDWINDOW, 20, 20, width, height, nullptr, nullptr, s_windowInstance, nullptr);
+		m_windowHandle = CreateWindow("Zanix Engine", title.GetPtr(), WS_OVERLAPPEDWINDOW, 20, 20, width, height, nullptr, nullptr, m_windowInstance, nullptr);
 
-		if (!s_windowHandle)
+		if (!m_windowHandle)
 			return false;
 
 		return true;
 	}
 	
+	/*
+	@brief : Create a window's surface
+	@return : Returns true if the creation of the window surface is a success, false otherwise
+	*/
 	bool Platform::CreateSurface()
 	{
 		VkWin32SurfaceCreateInfoKHR surfaceInfo =
@@ -65,20 +85,15 @@ namespace Zx
 			VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
 			nullptr,
 			0,
-			s_windowInstance,
-			s_windowHandle
+			m_windowInstance,
+			m_windowHandle
 		};
 
-		if (vkCreateWin32SurfaceKHR(Renderer::GetVulkanInstance(), &surfaceInfo, nullptr, &s_windowSurface) == VK_SUCCESS)
+		if (vkCreateWin32SurfaceKHR(m_instance, &surfaceInfo, nullptr, &m_windowSurface) == VK_SUCCESS)
 			return true;
 
 		std::cout << "Could not create presentation surface." << std::endl;
 
 		return false;
-	}
-	
-	const VkSurfaceKHR& Platform::GetSurface() const
-	{
-		return s_windowSurface;
 	}
 }

@@ -1,60 +1,104 @@
+#include <Zanix/Core/Exception.hpp>
 #include <Zanix/Renderer/Device.hpp>
 #include <Zanix/Renderer/Window.hpp>
-#include <Zanix/Core/Exception.hpp>
 #include <Zanix/Renderer/SwapChain.hpp>
 
 namespace Zx
 {
+	/*
+	@brief : Constructor with the needed informations
+	@param : The device of the application
+	@param : The window of the application
+	*/
+	SwapChain::SwapChain(const Device& device, const Window& window) : m_isRenderAvailable(false)
+	{
+		m_device = std::make_shared<Device>(device);
+		m_window = std::make_shared<Window>(window);
+		m_swapChain = std::make_shared<SwapChains>();
+	}
+
+	/*
+	@brief : Copy constructor
+	@param : A constant reference to the swapChain to copy
+	*/
+	SwapChain::SwapChain(const SwapChain& swap) : m_device(swap.m_device), m_swapChain(swap.m_swapChain), m_window(swap.m_window)
+	{}
+
+	/*
+	@brief : Movement constructor
+	@param : A constant reference to the SwapChain to move
+	*/
+	SwapChain::SwapChain(SwapChain&& swapChain) noexcept
+	{
+		std::swap(m_device, swapChain.m_device);
+		std::swap(m_swapChain, swapChain.m_swapChain);
+		std::swap(m_window, swapChain.m_window);
+	}
+
 	/*
 	@brief : Creates a swap chain
 	@returns : Returns true if the creation is a success, false otherwise
 	*/
 	bool SwapChain::CreateSwapChain()
 	{
-		s_isRenderAvailable = false;
+		m_isRenderAvailable = false;
 
-		if (Device::GetDevices()->logicalDevice != VK_NULL_HANDLE)
-			vkDeviceWaitIdle(Device::GetDevices()->logicalDevice);
+		if (m_device->GetDevice()->logicalDevice != VK_NULL_HANDLE)
+			vkDeviceWaitIdle(m_device->GetDevice()->logicalDevice);
 
-		for (size_t i = 0; i < s_swapChain->image.size(); i++)
+		for (size_t i = 0; i < m_swapChain->image.size(); i++)
 		{
-			if (s_swapChain->imageView[i] != VK_NULL_HANDLE)
+			if (m_swapChain->imageView[i] != VK_NULL_HANDLE)
 			{
-				vkDestroyImageView(Device::GetDevices()->logicalDevice, s_swapChain->imageView[i], nullptr);
-				s_swapChain->imageView[i] = VK_NULL_HANDLE;
+				vkDestroyImageView(m_device->GetDevice()->logicalDevice, m_swapChain->imageView[i], nullptr);
+				m_swapChain->imageView[i] = VK_NULL_HANDLE;
 			}
 		}
+		
+		m_swapChain->image.clear();
 
-		s_swapChain->image.clear();
-
-		VkSurfaceCapabilitiesKHR surfaceCapabilities;
-
-		if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR(Device::GetDevices()->physicalDevice, Window::GetSurface(), &surfaceCapabilities) != VK_SUCCESS)
-			throw ZOperationFailed(__FILE__, "Failed to get a physical device surface capabilities");
+		VkSurfaceCapabilitiesKHR surfaceCapabilities;	
+		if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_device->GetDevice()->physicalDevice, m_window->GetSurface(), &surfaceCapabilities) != VK_SUCCESS)
+		{
+			std::cout << "Failed to get a physical device surface capabilities" << std::endl;
+			return false;
+		}
 
 		//Formats
 
 		uint32_t formatCount = 0;
-		if((vkGetPhysicalDeviceSurfaceFormatsKHR(Device::GetDevices()->physicalDevice, Window::GetSurface(), &formatCount, nullptr)
-			!= VK_SUCCESS) ||(formatCount == 0))
-			throw ZOperationFailed(__FILE__, "Failed to get the format count available");
+		if ((vkGetPhysicalDeviceSurfaceFormatsKHR(m_device->GetDevice()->physicalDevice, m_window->GetSurface(), &formatCount, nullptr)
+			!= VK_SUCCESS) || (formatCount == 0))
+		{
+			std::cout << "Failed to get the format count available" << std::endl;
+			return false;
+		}
 
 		std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
-		if(vkGetPhysicalDeviceSurfaceFormatsKHR(Device::GetDevices()->physicalDevice, Window::GetSurface(), &formatCount, surfaceFormats.data())
+		if (vkGetPhysicalDeviceSurfaceFormatsKHR(m_device->GetDevice()->physicalDevice, m_window->GetSurface(), &formatCount, surfaceFormats.data())
 			!= VK_SUCCESS)
-			throw ZOperationFailed(__FILE__, "Failed to get the format count available - data");
+		{
+			std::cout << "Failed to get the format count available - data" << std::endl;
+			return false;
+		}
 
 		//Modes
 
 		uint32_t modesCount = 0;
-		if ((vkGetPhysicalDeviceSurfacePresentModesKHR(Device::GetDevices()->physicalDevice, Window::GetSurface(), &modesCount, nullptr)
+		if ((vkGetPhysicalDeviceSurfacePresentModesKHR(m_device->GetDevice()->physicalDevice, m_window->GetSurface(), &modesCount, nullptr)
 			!= VK_SUCCESS) || (modesCount == 0))
-			throw ZOperationFailed(__FILE__, "Failed to get the present modes count available");
+		{
+			std::cout << "Failed to get the present modes count available" << std::endl;
+			return false;
+		}
 
 		std::vector<VkPresentModeKHR> presentModes(modesCount);
-		if (vkGetPhysicalDeviceSurfacePresentModesKHR(Device::GetDevices()->physicalDevice, Window::GetSurface(), &modesCount, presentModes.data())
+		if (vkGetPhysicalDeviceSurfacePresentModesKHR(m_device->GetDevice()->physicalDevice, m_window->GetSurface(), &modesCount, presentModes.data())
 			!= VK_SUCCESS)
-			throw ZOperationFailed(__FILE__, "Failed to get the present modes count available - data");
+		{
+			std::cout << "Failed to get the present modes count available - data" << std::endl;
+			return false;
+		}
 
 		//Création de la swap chain
 
@@ -64,7 +108,7 @@ namespace Zx
 		VkImageUsageFlags desiredUsageFlags = GetSwapChainUsageFlags(surfaceCapabilities);
 		VkSurfaceTransformFlagBitsKHR desiredSurfaceTransform = GetSwapChainTransform(surfaceCapabilities);
 		VkPresentModeKHR desiredPresentMode = GetSwapChainPresentMode(presentModes);
-		VkSwapchainKHR oldSwapChain = s_swapChain->swapChain;
+		VkSwapchainKHR oldSwapChain = m_swapChain->swapChain;
 
 		if ((static_cast<int>(desiredUsageFlags) == -1) || (static_cast<int>(desiredPresentMode) == -1))
 			return false;
@@ -77,7 +121,7 @@ namespace Zx
 			VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
 			nullptr,
 			0,
-			Window::GetSurface(),
+			m_window->GetSurface(),
 			desiredNumImages,
 			desiredSurfaceFormat.format,
 			desiredSurfaceFormat.colorSpace,
@@ -94,38 +138,50 @@ namespace Zx
 			oldSwapChain
 		};
 
-		if (vkCreateSwapchainKHR(Device::GetDevices()->logicalDevice, &swapChainInfo, nullptr, &s_swapChain->swapChain) != VK_SUCCESS)
-			throw ZOperationFailed(__FILE__, "Failed to create swap chain");
+		if (vkCreateSwapchainKHR(m_device->GetDevice()->logicalDevice, &swapChainInfo, nullptr, &m_swapChain->swapChain) != VK_SUCCESS)
+		{
+			std::cout << "Failed to create swap chain" << std::endl;
+			return false;
+		}
 
 		if (oldSwapChain != VK_NULL_HANDLE)
-			vkDestroySwapchainKHR(Device::GetDevices()->logicalDevice, oldSwapChain, nullptr);
+			vkDestroySwapchainKHR(m_device->GetDevice()->logicalDevice, oldSwapChain, nullptr);
 
-		s_isRenderAvailable = true;
+		m_isRenderAvailable = true;
 
-		s_swapChain->format = desiredSurfaceFormat.format;
+		m_swapChain->format = desiredSurfaceFormat.format;
 		
 		uint32_t imageCount = 0;
-		if ((vkGetSwapchainImagesKHR(Device::GetDevices()->logicalDevice, s_swapChain->swapChain, &imageCount, nullptr)) != VK_SUCCESS || (imageCount == 0))
-			throw ZOperationFailed(__FILE__, "Could not get the number of swap chain images");
+		if ((vkGetSwapchainImagesKHR(m_device->GetDevice()->logicalDevice, m_swapChain->swapChain, &imageCount, nullptr)) != VK_SUCCESS || (imageCount == 0))
+		{
+			std::cout << "Could not get the number of swap chain images" << std::endl;
+			return false;
+		}
 
-		s_swapChain->image.resize(imageCount);
+		m_swapChain->image.resize(imageCount);
 			
-		if(vkGetSwapchainImagesKHR(Device::GetDevices()->logicalDevice, s_swapChain->swapChain, &imageCount, s_swapChain->image.data()) != VK_SUCCESS)
-			throw ZOperationFailed(__FILE__, "Could not get swap chain images");
+		if(vkGetSwapchainImagesKHR(m_device->GetDevice()->logicalDevice, m_swapChain->swapChain, &imageCount, m_swapChain->image.data()) != VK_SUCCESS)
+		{
+			std::cout << "Could not get the number of swap chain images - data" << std::endl;
+			return false;
+		}
 
-		CreateSwapChainImageView();
-
-		return true;
+		return CreateSwapChainImageView();
 	}
 
 	/*
-	@brief : Returns the swap chain
+	@brief : Assign a SwapChain by move semantic
+	@param : A reference to the SwapChain to move
+	@return : The SwapChain to move
 	*/
-	const std::shared_ptr<SwapChain::SwapChains>&  SwapChain::GetSwapChain()
+	SwapChain& SwapChain::operator=(SwapChain&& swapChain) noexcept
 	{
-		return s_swapChain;
-	}
+		std::swap(m_device, swapChain.m_device);
+		std::swap(m_swapChain, swapChain.m_swapChain);
+		std::swap(m_window, swapChain.m_window);
 
+		return (*this);
+	}
 
 	//-------------------------Private method-------------------------
 
@@ -219,20 +275,20 @@ namespace Zx
 
 	//-------------------------------------------------------------------------
 
-	void SwapChain::CreateSwapChainImageView()
+	bool SwapChain::CreateSwapChainImageView()
 	{
-		s_swapChain->imageView.resize(s_swapChain->image.size());
+		m_swapChain->imageView.resize(m_swapChain->image.size());
 
-		for (size_t i = 0; i < s_swapChain->image.size(); ++i)
+		for (size_t i = 0; i < m_swapChain->image.size(); ++i)
 		{
 			VkImageViewCreateInfo imageViewInfo =
 			{
 				VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 				nullptr,
 				0,
-				s_swapChain->image[0],
+				m_swapChain->image[i],
 				VK_IMAGE_VIEW_TYPE_2D,
-				s_swapChain->format,
+				m_swapChain->format,
 				{
 					VK_COMPONENT_SWIZZLE_IDENTITY,
 					VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -248,16 +304,17 @@ namespace Zx
 				}
 			};
 			
-			if (vkCreateImageView(Device::GetDevices()->logicalDevice, &imageViewInfo, nullptr, &s_swapChain->imageView[i]) != VK_SUCCESS)
-				throw ZOperationFailed(__FILE__, "Failed to create a swap chain imave view");
+			if (vkCreateImageView(m_device->GetDevice()->logicalDevice, &imageViewInfo, nullptr, &m_swapChain->imageView[i]) != VK_SUCCESS)
+			{
+				std::cout << "Failed to create a swap chain imave view" << std::endl;
+				return false;
+			}
 		}
 
-		s_isRenderAvailable = true;
+		m_isRenderAvailable = true;
+		
+		return true;
 	}
 
-	//-------------------------------------------------------------------------
-	
-	std::shared_ptr<SwapChain::SwapChains> SwapChain::s_swapChain = std::make_shared<SwapChain::SwapChains>();
-
-	bool SwapChain::s_isRenderAvailable = false;
+	//-------------------------------------------------------------------------h
 }

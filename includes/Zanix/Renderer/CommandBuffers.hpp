@@ -2,27 +2,62 @@
 #define ZCOMMANDBUFFERS_HPP
 
 #include <vector>
+#include <memory>
+#include <vulkan/vulkan.h>
 
 namespace Zx
 {
+	class Device;
+	class SwapChain;
+	class RenderPass;
+	class Pipeline;
+
 	class CommandBuffers
 	{
 	public:
-		static void CreateCommandBuffers();
-		static void DestroyRessources();
+		CommandBuffers() = default;
+		CommandBuffers(const Device& device, const SwapChain& swapChain, const Pipeline& pipeline, const RenderPass& renderPass);
+		CommandBuffers(const CommandBuffers& commandBuffers);
+
+		~CommandBuffers() = default;
+
+		bool CreateCommandBuffers();
+		bool RecordCommandBuffers();
+
+		void DestroyRessources();
+		void DestroyCommandPool();
+		void FreeCommandBuffers();
 		
-		static const VkCommandBuffer& GetPresentQueueCommandBuffers(uint32_t imageIndex);
-		static const std::vector<VkCommandBuffer>& GetPresentQueueCommandBuffers();
+	public:
+		inline const VkCommandBuffer& GetCommandBuffers(uint32_t imageIndex) const
+		{
+			return m_commandBuffers[imageIndex];
+		}
 
-		static const VkCommandPool& GetCommandPool();
+		inline const std::vector<VkCommandBuffer>& GetCommandBuffers() const
+		{
+			return m_commandBuffers;
+		}
+
+		inline const VkCommandPool& GetCommandPool() const
+		{
+			return m_commandPool;
+		}
 
 	private:
-		static VkCommandPool s_commandPool;
-		static std::vector<VkCommandBuffer> s_presentQueueCommandBuffers;
-	private:
-		static bool RecordCommandsBuffers();
+		VkCommandPool m_commandPool;
+		std::vector<VkCommandBuffer> m_commandBuffers;
+		std::shared_ptr<Device> m_device;
+		std::shared_ptr<SwapChain> m_swapChain;
+		std::shared_ptr<Pipeline> m_pipeline;
+		std::shared_ptr<RenderPass> m_renderPass;
 
-		static std::vector<VkCommandBuffer> BuildVectorCommandBuffers();
+	private:
+		bool CreateCommandPool(uint32_t indexFamily, VkCommandPool* commandPool);
+
+		bool AllocateCommandBuffers(uint32_t imageCount, VkCommandPool commandPool, VkCommandBuffer* commandBuffer);
+
+		std::vector<VkCommandBuffer> BuildVectorCommandBuffers();
 	};
 }
 

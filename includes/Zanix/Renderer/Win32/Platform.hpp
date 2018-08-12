@@ -2,23 +2,51 @@
 #define ZPLATFORM_HPP
 
 #include <Windows.h>
+#include <memory>
 #include <vulkan/vulkan.h>
-#include <Zanix/Core/String.hpp>
 
 namespace Zx
 {
+	class Renderer;
+	class String;
+
 	class Platform
 	{
 	public:
-		bool CreateSurface();
-		const VkSurfaceKHR& GetSurface() const;
+		Platform() = default;
+		Platform(const VkInstance& instance);
+		~Platform() = default;
 
+		bool CreateSurface();
 		bool CreateZWindow(int width, int height, const String& title);
 
+	public:
+		inline void SetVkInstance(const VkInstance& instance)
+		{
+			m_instance = instance;
+		}
+
+		inline const VkSurfaceKHR& GetSurface() const
+		{
+			return m_windowSurface;
+		}
+
+		inline const HWND& GetHandle() const
+		{
+			return m_windowHandle;
+		}
+
+		inline const HINSTANCE& GetInstance() const
+		{
+			return m_windowInstance;
+		}
+
 	private:
-		HINSTANCE s_windowInstance;
-		HWND s_windowHandle;
-		VkSurfaceKHR s_windowSurface;
+		VkInstance m_instance;
+
+		HINSTANCE m_windowInstance;
+		HWND m_windowHandle;
+		VkSurfaceKHR m_windowSurface;
 	};
 }
 
