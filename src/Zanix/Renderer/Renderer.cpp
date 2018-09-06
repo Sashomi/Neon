@@ -38,9 +38,19 @@ namespace Zx
 	@brief : Constructor with the needed informations
 	@param : The device of the application
 	*/
-	Renderer::Renderer(const Device& device) : m_instance(VK_NULL_HANDLE), m_callback(VK_NULL_HANDLE)
+	Renderer::Renderer(Device& device, Window& window, SwapChain& swapChain)
+		: m_instance(VK_NULL_HANDLE), m_callback(VK_NULL_HANDLE)
 	{
 		m_device = std::make_shared<Device>(device);
+		m_window = std::make_shared<Window>(window);
+		m_swapChain = std::make_shared<SwapChain>(swapChain);
+
+		if (!Initialize())
+			std::cout << "Failed to initialize renderer" << std::endl;
+
+		device = std::move(*m_device);
+		window = std::move(*m_window);
+		swapChain = std::move(*m_swapChain);
 	}
 
 	/*
@@ -55,10 +65,53 @@ namespace Zx
 	}
 	
 	/*
-	@brief : Initialize Vulkan API
-	@return : Returns true if the initialization of the vulkan API is a success, false otherwise
+	@brief : Movement constructor
+	@param : The Renderer to move
 	*/
-	bool Renderer::Initialize(Window& window, Device& device, SwapChain& swapChain)
+	Renderer::Renderer(Renderer&& renderer) noexcept
+	{
+		std::swap(m_device, renderer.m_device);
+		std::swap(m_callback, renderer.m_callback);
+		std::swap(m_instance, renderer.m_instance);
+		std::swap(m_swapChain, renderer.m_swapChain);
+		std::swap(m_window, renderer.m_window);
+	}
+
+	/*
+	@brief : Destroys vulkan instance and debug callback
+	*/
+	Renderer::~Renderer()
+	{
+		#ifdef VALIDATIONS_LAYERS
+				DestroyDebugCallback(m_instance, m_callback, nullptr);
+		#endif
+
+		if (m_instance != VK_NULL_HANDLE)
+		{
+			vkDestroyInstance(m_instance, nullptr);
+			m_instance = VK_NULL_HANDLE;
+		}
+	}
+
+	/*
+	@brief : Assigns the renderer by move semantic
+	@param : The renderer to move
+	@return : A reference to this
+	*/
+	Renderer& Renderer::operator=(Renderer&& renderer) noexcept
+	{
+		std::swap(m_device, renderer.m_device);
+		std::swap(m_callback, renderer.m_callback);
+		std::swap(m_instance, renderer.m_instance);
+		std::swap(m_swapChain, renderer.m_swapChain);
+		std::swap(m_window, renderer.m_window);
+
+		return (*this);
+	}
+
+
+	//-------------------------Private method-------------------------
+	bool Renderer::Initialize()
 	{
 		if (!(CreateInstance()))
 			return false;
@@ -66,35 +119,28 @@ namespace Zx
 		if (!SetupDebugCallback())
 			return false;
 
-		window.SetVkInstance(m_instance);
-			
-		if (!(window.CreatePresentationSurface()))
+		m_window->SetVkInstance(m_instance);
+
+		if (!(m_window->CreatePresentationSurface()))
 			return false;
 
-		Device d(*this, swapChain, window);
-		device = std::move(d);
-			
-		if (!(device.CreateDevice()))
+		m_device->SetRenderer(*this);
+		m_device->SetSwapChain(*m_swapChain);
+		m_device->SetWindow(*m_window);
+
+		if (!m_device->CreateDevice())
 			return false;
 
-		SwapChain swap(device, window);
-		swapChain = std::move(swap);
+		m_swapChain->SetDevice(*m_device);
+		m_swapChain->SetWindow(*m_window);
 
-		if (!(swapChain.CreateSwapChain()))
+		if (!(m_swapChain->CreateSwapChain()))
 			return false;
 
 		return true;
 	}
 
-	/*
-	@brief : Destroys the vulkan instance
-	*/
-	void Renderer::DestroyRenderer()
-	{
-		DestroyInstance();
-	}
-
-	//-------------------------Private method-------------------------
+	//-------------------------------------------------------------------------
 
 	bool Renderer::CreateInstance()
 	{
@@ -199,27 +245,6 @@ namespace Zx
 		}
 
 		return true;
-	}
-
-	//-------------------------------------------------------------------------
-
-	void Renderer::DestroyInstance()
-	{
-		#ifdef VALIDATIONS_LAYERS
-				DestroyDebugCallback(m_instance, m_callback, nullptr);
-		#endif
-
-		if (m_instance != VK_NULL_HANDLE)
-		{
-			vkDestroyInstance(m_instance, nullptr);
-		}
-	}
-
-	//-------------------------------------------------------------------------
-
-	void Renderer::Destroy()
-	{
-		DestroyInstance();
 	}
 
 	//-------------------------------------------------------------------------

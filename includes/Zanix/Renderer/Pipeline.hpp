@@ -10,32 +10,37 @@ namespace Zx
 	class RenderPass;
 	class SwapChain;
 
+	template <class O, class F>
+	class SmartDeleter;
+
 	class Pipeline
 	{
 	public:
 		Pipeline() = default;
-		Pipeline(const Device& device, const RenderPass& renderPass, const SwapChain& swapChain);
+		Pipeline(Device& device, RenderPass& renderPass, SwapChain& swapChain);
 		Pipeline(const Pipeline& pipeline);
 
-		~Pipeline() = default;
+		~Pipeline();
 
-		bool CreatePipeline();
-		void DestroyPipeline();
+		//Getter
 
-	public:
-		inline const VkPipeline& GetPipeline() const
-		{
-			return m_pipeline;
-		}
+		inline const VkPipeline& GetPipeline() const;
+
+		Pipeline& operator=(Pipeline&&) noexcept;
 
 	private:
-		VkPipeline m_pipeline;
 		std::shared_ptr<SwapChain> m_swapChain;
 		std::shared_ptr<Device> m_device;
 		std::shared_ptr<RenderPass> m_renderPass;
+
+		VkPipeline m_pipeline;
 	private:
-		VkPipelineLayout CreatePipelineLayout();
+		bool CreatePipeline();
+
+		SmartDeleter<VkPipelineLayout, PFN_vkDestroyPipelineLayout> CreatePipelineLayout();
 	};
 }
+
+#include "Pipeline.inl"
 
 #endif //PIPELINE_HPP

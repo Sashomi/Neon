@@ -36,26 +36,30 @@ namespace Zx
 	}
 
 	/*
+	@brief : Destroys SwapChain
+	*/
+	SwapChain::~SwapChain()
+	{
+		if (m_swapChain->swapChain != VK_NULL_HANDLE)
+		{
+			vkDestroySwapchainKHR(m_device->GetDevice()->logicalDevice, m_swapChain->swapChain, nullptr);
+			m_swapChain->swapChain = VK_NULL_HANDLE;
+		}
+	}
+
+	/*
 	@brief : Creates a swap chain
 	@returns : Returns true if the creation is a success, false otherwise
 	*/
 	bool SwapChain::CreateSwapChain()
 	{
+		if (m_swapChain == nullptr)
+			m_swapChain = std::make_shared<SwapChains>();
+
 		m_isRenderAvailable = false;
 
 		if (m_device->GetDevice()->logicalDevice != VK_NULL_HANDLE)
 			vkDeviceWaitIdle(m_device->GetDevice()->logicalDevice);
-
-		for (size_t i = 0; i < m_swapChain->image.size(); i++)
-		{
-			if (m_swapChain->imageView[i] != VK_NULL_HANDLE)
-			{
-				vkDestroyImageView(m_device->GetDevice()->logicalDevice, m_swapChain->imageView[i], nullptr);
-				m_swapChain->imageView[i] = VK_NULL_HANDLE;
-			}
-		}
-		
-		m_swapChain->image.clear();
 
 		VkSurfaceCapabilitiesKHR surfaceCapabilities;	
 		if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_device->GetDevice()->physicalDevice, m_window->GetSurface(), &surfaceCapabilities) != VK_SUCCESS)
@@ -149,6 +153,7 @@ namespace Zx
 
 		m_isRenderAvailable = true;
 
+		m_swapChain->extent = desiredExtent;
 		m_swapChain->format = desiredSurfaceFormat.format;
 		
 		uint32_t imageCount = 0;
@@ -315,6 +320,4 @@ namespace Zx
 		
 		return true;
 	}
-
-	//-------------------------------------------------------------------------h
 }

@@ -20,22 +20,19 @@ namespace Zx
 		SwapChain(const SwapChain& swapChain);
 		SwapChain(SwapChain&& swapChain) noexcept;
 
-		~SwapChain() = default;
+		~SwapChain();
 
 		bool CreateSwapChain();
+		
+		//Getters and Setters
+
+		inline bool IsRenderAvailable() const;
+		inline const std::shared_ptr<SwapChains>& GetSwapChain() const;
+		
+		inline void SetDevice(const Device& device);
+		inline void SetWindow(const Window& window);
 
 		SwapChain& operator=(SwapChain&& swapChain) noexcept;
-
-	public:
-		inline bool IsRenderAvailable() const
-		{
-			return m_isRenderAvailable;
-		}
-
-		inline const std::shared_ptr<SwapChains>& GetSwapChain() const
-		{
-			return m_swapChain;
-		}
 
 	private:
 		std::shared_ptr<SwapChains> m_swapChain;
@@ -67,5 +64,7 @@ namespace Zx
 		VkPresentModeKHR GetSwapChainPresentMode(const std::vector<VkPresentModeKHR>& presentModes);
 	};
 }
+
+#include "SwapChain.inl"
 
 #endif //ZSWAPCHAIN_HPP

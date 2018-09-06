@@ -12,53 +12,48 @@ namespace Zx
 	class RenderPass;
 	class Pipeline;
 
+	struct RenderingResourcesData
+	{
+		VkCommandBuffer commandBuffer;
+		VkFence fence;
+		VkFramebuffer framebuffer;
+		VkSemaphore imageAvailableSemaphore;
+		VkSemaphore finishedRenderingSemaphore;
+
+		inline RenderingResourcesData() : commandBuffer(VK_NULL_HANDLE), fence(VK_NULL_HANDLE), framebuffer(VK_NULL_HANDLE)
+			, imageAvailableSemaphore(VK_NULL_HANDLE), finishedRenderingSemaphore(VK_NULL_HANDLE)
+		{}
+	};
+
 	class CommandBuffers
 	{
 	public:
 		CommandBuffers() = default;
-		CommandBuffers(const Device& device, const SwapChain& swapChain, const Pipeline& pipeline, const RenderPass& renderPass);
+		CommandBuffers(Device& device, SwapChain& swapChain, Pipeline& pipeline, RenderPass& renderPass);
 		CommandBuffers(const CommandBuffers& commandBuffers);
 
-		~CommandBuffers() = default;
-
-		bool CreateCommandBuffers();
-		bool RecordCommandBuffers();
-
-		void DestroyRessources();
-		void DestroyCommandPool();
-		void FreeCommandBuffers();
+		~CommandBuffers();
 		
-	public:
-		inline const VkCommandBuffer& GetCommandBuffers(uint32_t imageIndex) const
-		{
-			return m_commandBuffers[imageIndex];
-		}
-
-		inline const std::vector<VkCommandBuffer>& GetCommandBuffers() const
-		{
-			return m_commandBuffers;
-		}
-
-		inline const VkCommandPool& GetCommandPool() const
-		{
-			return m_commandPool;
-		}
+		inline const VkCommandPool& GetCommandPool() const;
+		inline std::vector<RenderingResourcesData>& GetRenderingResources();
 
 	private:
+		std::vector<RenderingResourcesData> m_renderingResources;
+
 		VkCommandPool m_commandPool;
-		std::vector<VkCommandBuffer> m_commandBuffers;
 		std::shared_ptr<Device> m_device;
 		std::shared_ptr<SwapChain> m_swapChain;
 		std::shared_ptr<Pipeline> m_pipeline;
 		std::shared_ptr<RenderPass> m_renderPass;
 
 	private:
+		bool CreateCommandBuffers();
 		bool CreateCommandPool(uint32_t indexFamily, VkCommandPool* commandPool);
 
 		bool AllocateCommandBuffers(uint32_t imageCount, VkCommandPool commandPool, VkCommandBuffer* commandBuffer);
-
-		std::vector<VkCommandBuffer> BuildVectorCommandBuffers();
 	};
 }
+
+#include "CommandBuffers.inl"
 
 #endif //ZCOMMANDBUFFERS_HPP

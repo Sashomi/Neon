@@ -1,27 +1,28 @@
-#include <vector>
+#include <iostream>
 #include <map>
 
 #include <Zanix/Core/Exception.hpp>
 #include <Zanix/Renderer/SwapChain.hpp>
 #include <Zanix/Renderer/Window.hpp>
+#include <Zanix/Renderer/CommandBuffers.hpp>
 #include <Zanix/Renderer/Renderer.hpp>
 #include <Zanix/Renderer/Device.hpp>
 
 namespace Zx
 {
-
 	/*
 	@brief : Constructor with the needed informations
 	@param : The Renderer of the application
 	@param : The SwapChain of the application
 	@param : The window of the Application
 	*/
-	Device::Device(const Renderer& renderer, const SwapChain& swapChain, const Window& window)
+	Device::Device(Renderer& renderer, SwapChain& swapChain, Window& window, std::vector<RenderingResourcesData>& renderingResources)
 	{
 		m_renderer = std::make_shared<Renderer>(renderer);
 		m_swapChain = std::make_shared<SwapChain>(swapChain);
 		m_window = std::make_shared<Window>(window);
 		m_device = std::make_shared<Devices>();
+		m_renderingResources = std::make_shared<std::vector<RenderingResourcesData>>(renderingResources);
 	}
 
 	/*
@@ -44,11 +45,23 @@ namespace Zx
 	}
 
 	/*
-	@brief : Founds a physical device and gets a graphics queue
-	@return : Returns true if the creation of the device is a success, false otherwise
+	@brief : Destroys the device
+	*/
+	Device::~Device()
+	{
+		vkDestroyDevice(m_device->logicalDevice, nullptr);
+		m_device->logicalDevice = VK_NULL_HANDLE;
+	}
+
+	/*
+	@brief : Creates the logical and physical device
+	@return : Returns true if the creation is a success, false otherwise
 	*/
 	bool Device::CreateDevice()
 	{
+		if (m_device == nullptr)
+			m_device = std::make_shared<Devices>();
+
 		if (!(FoundPhysicalDevice()) || !(CreateLogicalDevice()))
 			return false;
 
@@ -56,38 +69,7 @@ namespace Zx
 
 		return true;
 	}
-
-	/*
-	@brief : Gets the graphics index family and the present index family
-	*/
-	void Device::GetDeviceQueue()
-	{
-		vkGetDeviceQueue(m_device->logicalDevice, m_device->graphicsIndexFamily, 0, &m_device->graphicsQueue);
-		vkGetDeviceQueue(m_device->logicalDevice, m_device->presentIndexFamily, 0, &m_device->presentQueue);
-	}
-
-	/*
-	@brief : Creates semaphores (rendering finished and image available)
-	@return : Returns true if the creation of the semaphores is a success, false otherwise
-	*/
-	bool Device::CreateSemaphores()
-	{
-		VkSemaphoreCreateInfo semaphoreInfo =
-		{
-			VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-			nullptr,
-			0
-		};
-
-		if ((vkCreateSemaphore(m_device->logicalDevice, &semaphoreInfo, nullptr, &m_device->imageAvailableSemaphore) != VK_SUCCESS)
-			|| (vkCreateSemaphore(m_device->logicalDevice, &semaphoreInfo, nullptr, &m_device->renderingFinishedSemaphore) != VK_SUCCESS))
-		{
-			std::cout << "Failed to create semaphore" << std::endl;
-			return false;
-		}
-
-		return true;
-	}
+	
 
 	/*
 	@brief : Assign a Device by move semantic
@@ -106,34 +88,10 @@ namespace Zx
 
 	//-------------------------Private method-------------------------
 
-	void Device::DestroyDevice()
+	void Device::GetDeviceQueue()
 	{
-		if (m_device->logicalDevice != VK_NULL_HANDLE)
-		{
-			vkDeviceWaitIdle(m_device->logicalDevice);
-
-			if (m_device->imageAvailableSemaphore != VK_NULL_HANDLE)
-			{
-				vkDestroySemaphore(m_device->logicalDevice, m_device->imageAvailableSemaphore, nullptr);
-			}
-
-			if (m_device->renderingFinishedSemaphore != VK_NULL_HANDLE)
-			{
-				vkDestroySemaphore(m_device->logicalDevice, m_device->renderingFinishedSemaphore, nullptr);
-			}
-
-			if (m_swapChain->GetSwapChain()->swapChain != VK_NULL_HANDLE)
-			{
-				vkDestroySwapchainKHR(m_device->logicalDevice, m_swapChain->GetSwapChain()->swapChain, nullptr);
-			}
-
-			vkDestroyDevice(m_device->logicalDevice, nullptr);
-
-			if (m_window->GetSurface() != VK_NULL_HANDLE)
-			{
-				vkDestroySurfaceKHR(m_renderer->GetVulkanInstance(), m_window->GetSurface(), nullptr);
-			}
-		}
+		vkGetDeviceQueue(m_device->logicalDevice, m_device->graphicsIndexFamily, 0, &m_device->graphicsQueue);
+		vkGetDeviceQueue(m_device->logicalDevice, m_device->presentIndexFamily, 0, &m_device->presentQueue);
 	}
 
 	//--------------------------------------------------------------------------

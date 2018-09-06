@@ -6,22 +6,30 @@
 #include <Zanix/Renderer/Device.hpp>
 #include <Zanix/Renderer/SwapChain.hpp>
 #include <Zanix/Renderer/RenderPass.hpp>
+#include <Zanix/Renderer/VertexBuffer.hpp>
 #include <Zanix/Renderer/Pipeline.hpp>
 
 namespace Zx
 {
 	/*
-	@brief : Constructor with the needed informations
+	@brief : Creates a pipeline
 	@param : The device of the application
 	@param : The renderPass of the application
 	@param : The swapChain of the application
 	*/
-	Pipeline::Pipeline(const Device& device, const RenderPass& renderPass, const SwapChain& swapChain)
+	Pipeline::Pipeline(Device& device, RenderPass& renderPass, SwapChain& swapChain)
 	{
 		m_device = std::make_shared<Device>(device);
 		m_renderPass = std::make_shared<RenderPass>(renderPass);
 		m_swapChain = std::make_shared<SwapChain>(swapChain);
 		m_pipeline = VK_NULL_HANDLE;
+
+		if (!CreatePipeline())
+			std::cout << "Failed to create pipeline" << std::endl;
+
+		device = std::move(*m_device);
+		renderPass = std::move(*m_renderPass);
+		swapChain = std::move(*m_swapChain);
 	}
 
 	/*
@@ -33,20 +41,40 @@ namespace Zx
 	{}
 
 	/*
-	@brief : Creates a graphics pipeline
-	@return : Returns true if the creation of the graphics pipeline is a success, false otherwise
+	@brief : Destroys a pipeline
 	*/
+	Pipeline::~Pipeline()
+	{
+		vkDestroyPipeline(m_device->GetDevice()->logicalDevice, m_pipeline, nullptr);
+		m_pipeline = VK_NULL_HANDLE;
+	}
+
+	/*
+	@brief : Assigns the pipeline by move semantic
+	@param : The pipeline to move
+	@return : A reference to this
+	*/
+	Pipeline& Pipeline::operator=(Pipeline&& pipeline) noexcept
+	{
+		std::swap(m_device, pipeline.m_device);
+		std::swap(m_pipeline, pipeline.m_pipeline);
+		std::swap(m_renderPass, pipeline.m_renderPass);
+		std::swap(m_swapChain, pipeline.m_swapChain);
+
+		return (*this);
+	}
+
+	//-------------------------Private method-------------------------
 	bool Pipeline::CreatePipeline()
 	{
-		ShaderModule v, f;
 		//Chemin absolu pour RenderDoc
-		SmartDeleter<VkShaderModule, PFN_vkDestroyShaderModule> vertex = v.CreateShaderModule("C:/Users/Lucas/Documents/ZanixEngine/shaders/vert.spv", *m_device);
-		SmartDeleter<VkShaderModule, PFN_vkDestroyShaderModule> frag = f.CreateShaderModule("C:/Users/Lucas/Documents/ZanixEngine/shaders/frag.spv", *m_device);
+		SmartDeleter<VkShaderModule, PFN_vkDestroyShaderModule> vertex = CreateShaderModule("C:/Users/Lucas/Documents/ZanixEngine/shaders/vert.spv", *m_device);
+		SmartDeleter<VkShaderModule, PFN_vkDestroyShaderModule> frag = CreateShaderModule("C:/Users/Lucas/Documents/ZanixEngine/shaders/frag.spv", *m_device);
 
 		if (!vertex || !frag)
 			return false;
 
-		std::vector<VkPipelineShaderStageCreateInfo> shaderStageInfo = 
+		std::vector<VkPipelineShaderStageCreateInfo> shaderStageInfo =
 		{
 			{
 				VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -68,15 +96,40 @@ namespace Zx
 			}
 		};
 
+		std::vector<VkVertexInputBindingDescription> inputBindingDescription =
+		{
+			{
+				0,
+				sizeof(VertexData),
+				VK_VERTEX_INPUT_RATE_VERTEX
+			}
+		};
+
+		std::vector<VkVertexInputAttributeDescription> inputAttributeDescription =
+		{
+			{
+				0,
+				inputBindingDescription.data()->binding,
+				VK_FORMAT_R32G32B32A32_SFLOAT,
+				offsetof(struct VertexData, x)
+			},
+			{
+				1,
+				inputBindingDescription.data()->binding,
+				VK_FORMAT_R32G32B32A32_SFLOAT,
+				offsetof(struct VertexData, r)
+			}
+		};
+
 		VkPipelineVertexInputStateCreateInfo pipelineVertexInfo =
 		{
 			VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
 			nullptr,
 			0,
-			0,
-			nullptr,
-			0,
-			nullptr
+			static_cast<uint32_t>(inputBindingDescription.size()),
+			inputBindingDescription.data(),
+			static_cast<uint32_t>(inputAttributeDescription.size()),
+			inputAttributeDescription.data()
 		};
 
 		VkPipelineInputAssemblyStateCreateInfo pipelineInputAssembly =
@@ -84,30 +137,8 @@ namespace Zx
 			VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
 			nullptr,
 			0,
-			VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+			VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
 			VK_FALSE
-		};
-
-		VkViewport viewport =
-		{
-			0.0f,
-			0.0f,
-			300.0f,
-			300.0f,
-			0.0f,
-			1.0f
-		};
-
-		VkRect2D scissor =
-		{
-			{
-				0,
-				0
-			},
-			{
-				300,
-				300
-			}
 		};
 
 		VkPipelineViewportStateCreateInfo pipelineViewportInfo =
@@ -116,9 +147,9 @@ namespace Zx
 			nullptr,
 			0,
 			1,
-			&viewport,
+			nullptr,
 			1,
-			&scissor
+			nullptr
 		};
 
 		VkPipelineRasterizationStateCreateInfo pipelineRasterizationInfo =
@@ -172,11 +203,26 @@ namespace Zx
 			VK_LOGIC_OP_COPY,
 			1,
 			&pipelineColorBendAttachmentState,
-			{0.0f, 0.0f, 0.0f, 0.0f }
+			{ 0.0f, 0.0f, 0.0f, 0.0f }
 		};
 
-		VkPipelineLayout pipelineLayout = CreatePipelineLayout();
-		
+		std::vector<VkDynamicState> dynamicState =
+		{
+			VK_DYNAMIC_STATE_VIEWPORT,
+			VK_DYNAMIC_STATE_SCISSOR
+		};
+
+		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo =
+		{
+			VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+			nullptr,
+			0,
+			static_cast<uint32_t>(dynamicState.size()),
+			dynamicState.data()
+		};
+
+		SmartDeleter<VkPipelineLayout, PFN_vkDestroyPipelineLayout> pipelineLayout = CreatePipelineLayout();
+
 		if (!pipelineLayout)
 			return false;
 
@@ -195,9 +241,9 @@ namespace Zx
 			&pipelineMultisampleInfo,
 			nullptr,
 			&pipelineColorBlendStateCreateInfo,
-			nullptr,
-			pipelineLayout,
-			m_renderPass->GetRenderPass()->renderPass,
+			&dynamicStateCreateInfo,
+			pipelineLayout.GetObj(),
+			m_renderPass->GetRenderPass(),
 			0,
 			VK_NULL_HANDLE,
 			-1
@@ -212,18 +258,9 @@ namespace Zx
 		return true;
 	}
 
-	/*
-	@brief : Destroys a graphics pipeline
-	*/
-	void Pipeline::DestroyPipeline()
-	{
-		vkDestroyPipeline(m_device->GetDevice()->logicalDevice, m_pipeline, nullptr);
-		m_pipeline = VK_NULL_HANDLE;
-	}
+	//----------------------------------------------------------------
 
-	//-------------------------Private method-------------------------
-
-	VkPipelineLayout Pipeline::CreatePipelineLayout()
+	SmartDeleter<VkPipelineLayout, PFN_vkDestroyPipelineLayout> Pipeline::CreatePipelineLayout()
 	{
 		// Pour l'instant on créé un pipeline "vide"
 
@@ -242,9 +279,9 @@ namespace Zx
 		if (vkCreatePipelineLayout(m_device->GetDevice()->logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
 		{
 			std::cout << "Could not create pipeline layout" << std::endl;
-			return VK_NULL_HANDLE;
+			return SmartDeleter<VkPipelineLayout, PFN_vkDestroyPipelineLayout>();
 		}
 
-		return pipelineLayout;
+		return SmartDeleter<VkPipelineLayout, PFN_vkDestroyPipelineLayout>(pipelineLayout, vkDestroyPipelineLayout, m_device->GetDevice()->logicalDevice);
 	}
 }

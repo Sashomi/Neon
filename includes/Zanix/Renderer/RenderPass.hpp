@@ -14,37 +14,28 @@ namespace Zx
 
 	public:
 		RenderPass() = default;
-		RenderPass(const Device& device, const SwapChain& swapChain);
+		RenderPass(Device& device, SwapChain& swapChain);
 		RenderPass(const RenderPass& renderPass);
 
-		~RenderPass() = default;
+		~RenderPass();
 
-		bool CreateRenderPass();
-		bool CreateFramebuffer();
+		inline const VkRenderPass& GetRenderPass() const;
+	
+		bool CreateFramebuffer(VkFramebuffer& framebuffer, VkImageView imageView);
 
-		void DestroyRenderPass();
-		void DestroyFrameBuffer();
-
-	public:
-		inline const std::shared_ptr<RenderPasss>& GetRenderPass() const
-		{
-			return m_renderPass;
-		}
+		RenderPass& operator=(RenderPass&&) noexcept;
 
 	private:
 		std::shared_ptr<SwapChain> m_swapChain;
 		std::shared_ptr<Device> m_device;
-		std::shared_ptr<RenderPasss> m_renderPass;
 
-		struct RenderPasss
-		{
-			inline RenderPasss() : renderPass(VK_NULL_HANDLE), framebuffer()
-			{}
-
-			VkRenderPass renderPass;
-			std::vector<VkFramebuffer> framebuffer;
-		};
+		VkRenderPass m_renderPass;
+	
+	private:
+		bool CreateRenderPass();
 	};
 }
+
+#include "RenderPass.inl"
 
 #endif //RENDERPASS_HPP

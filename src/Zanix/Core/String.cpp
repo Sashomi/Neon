@@ -57,7 +57,7 @@ namespace Zx
 	}
 
 	/*
-	  @brief : Movement construct
+	  @brief : Movement constructor
 	  @param : The String to move
 	 */
 	String::String(String&& string) noexcept

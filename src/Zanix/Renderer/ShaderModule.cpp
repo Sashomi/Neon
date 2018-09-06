@@ -10,7 +10,7 @@ namespace Zx
 	@param : The spv file
 	@return : Returns a VkShaderModule corresponding to the file
 	*/
-	SmartDeleter<VkShaderModule, PFN_vkDestroyShaderModule> ShaderModule::CreateShaderModule(const String& filename, const Device& device)
+	SmartDeleter<VkShaderModule, PFN_vkDestroyShaderModule> CreateShaderModule(const String& filename, const Device& device)
 	{
 		File file(filename);
 		const std::vector<char> code = file.GetBinaryFileContent();

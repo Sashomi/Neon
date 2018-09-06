@@ -1,7 +1,8 @@
-#ifndef ZDEVICE_HPP
-#define ZDEVICE_HPP
+#ifndef DEVICE_HPP
+#define DEVICE_HPP
 
 #include <memory>
+#include <vector>
 #include <vulkan/vulkan.h>
 
 namespace Zx
@@ -9,6 +10,8 @@ namespace Zx
 	class SwapChain;
 	class Window;
 	class Renderer;
+	
+	struct RenderingResourcesData;
 
 	class Device
 	{
@@ -16,38 +19,35 @@ namespace Zx
 
 	public:
 		Device() = default;
-		Device(const Renderer& renderer, const SwapChain& swapChain, const Window& window);
+		Device(Renderer& renderer, SwapChain& swapChain, Window& window, std::vector<RenderingResourcesData>& renderingResources);
 		Device(const Device& device);
 		Device(Device&& device) noexcept;
 
-		~Device() = default;
+		~Device();
 
 		bool CreateDevice();
-		bool CreateSemaphores();
 
-		void DestroyDevice();
+		//Getters and Setters
 
-		void GetDeviceQueue();
+		inline const std::shared_ptr<Devices>& GetDevice() const;
+
+		inline void SetSwapChain(const SwapChain&);
+		inline void SetWindow(const Window&);
+		inline void SetRenderer(const Renderer&);
 
 		Device& operator=(Device&& device) noexcept;
-
-	public:
-		inline const std::shared_ptr<Devices>& GetDevice() const
-		{
-			return m_device;
-		}
 
 	private:
 		std::shared_ptr<Devices> m_device;
 		std::shared_ptr<Renderer> m_renderer;
 		std::shared_ptr<Window> m_window;
 		std::shared_ptr<SwapChain> m_swapChain;
+		std::shared_ptr<std::vector<RenderingResourcesData>> m_renderingResources;
 
 		struct Devices
 		{
 			inline Devices() : logicalDevice(VK_NULL_HANDLE), physicalDevice(VK_NULL_HANDLE), graphicsIndexFamily(UINT32_MAX),
-				presentIndexFamily(UINT32_MAX), graphicsQueue(VK_NULL_HANDLE), presentQueue(VK_NULL_HANDLE),
-				renderingFinishedSemaphore(VK_NULL_HANDLE), imageAvailableSemaphore(VK_NULL_HANDLE)
+				presentIndexFamily(UINT32_MAX), graphicsQueue(VK_NULL_HANDLE), presentQueue(VK_NULL_HANDLE)
 			{}
 
 			VkDevice logicalDevice;
@@ -56,20 +56,20 @@ namespace Zx
 			uint32_t presentIndexFamily;
 			VkQueue graphicsQueue;
 			VkQueue presentQueue;
-			VkSemaphore renderingFinishedSemaphore;
-			VkSemaphore imageAvailableSemaphore;
 		};
 
 	private:
-		bool FoundPhysicalDevice();
-		int GetGPUScore(const VkPhysicalDevice& device);
-
 		bool CreateLogicalDevice();
-
+		bool FoundPhysicalDevice();
 		bool CheckFamilyQueue(const VkPhysicalDevice& device);
-
 		bool IsExtensionAvailable();
+
+		void GetDeviceQueue();
+
+		int GetGPUScore(const VkPhysicalDevice& device);
 	};
 }
 
-#endif //ZDEVICE_HPP
+#include "Device.inl"
+
+#endif //DEVICE_HPP

@@ -12,11 +12,7 @@ namespace Zx
 	class SmartDeleter;
 	class Device;
 
-	class ShaderModule
-	{
-	public:
-		SmartDeleter<VkShaderModule, PFN_vkDestroyShaderModule> CreateShaderModule(const String& filename, const Device& device);
-	};
+	SmartDeleter<VkShaderModule, PFN_vkDestroyShaderModule> CreateShaderModule(const String& filename, const Device& device);
 }
 
 #endif //SHADERMODULE_HPP

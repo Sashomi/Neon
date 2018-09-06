@@ -28,6 +28,7 @@ namespace Zx
 		
 		bool CreateZWindow(int width, int height, const String& title);
 
+		Window& operator=(Window&&) noexcept;
 	public:
 		inline void SetVkInstance(const VkInstance& instance)
 		{

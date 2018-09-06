@@ -9,32 +9,87 @@
 namespace Zx
 {
 	/*
-	@brief : Constructor with the needed informations
+	@brief : Creates a command buffers
 	@param : The device of the application
 	@param  The swapChain of the application
 	@param : The renderPass of the application
 	*/
-	CommandBuffers::CommandBuffers(const Device& device, const SwapChain& swapChain, const Pipeline& pipeline, const RenderPass& renderPass)
+	CommandBuffers::CommandBuffers(Device& device, SwapChain& swapChain, Pipeline& pipeline, RenderPass& renderPass) :
+		m_renderingResources(3)
 	{
-		m_commandBuffers = BuildVectorCommandBuffers();
 		m_device = std::make_shared<Device>(device);
 		m_swapChain = std::make_shared<SwapChain>(swapChain);
 		m_pipeline = std::make_shared<Pipeline>(pipeline);
 		m_renderPass = std::make_shared<RenderPass>(renderPass);
+
+		if (!CreateCommandBuffers())
+			std::cout << "Failed to create command buffers" << std::endl;
+
+		device = std::move(*m_device);
+		swapChain = std::move(*m_swapChain);
+		pipeline = std::move(*m_pipeline);
+		renderPass = std::move(*m_renderPass);
 	}
 
 	/*
-	@brief : Copy constructor
+	@brief : Copies constructor
 	@param : A constant reference to the Command Buffers to copy
 	*/
 	CommandBuffers::CommandBuffers(const CommandBuffers& cmd) : m_device(cmd.m_device), m_swapChain(cmd.m_swapChain), m_pipeline(cmd.m_pipeline)
-		, m_renderPass(cmd.m_renderPass), m_commandPool(cmd.m_commandPool), m_commandBuffers(cmd.m_commandBuffers)
+		, m_renderPass(cmd.m_renderPass), m_commandPool(cmd.m_commandPool), m_renderingResources(cmd.m_renderingResources)
 	{}
 
 	/*
-	@brief : Creates command buffers
-	@return : Returns true if the creation of the command buffers is a success, false otherwise
+	@brief : Destroys the rendering resources and the command pool
 	*/
+	CommandBuffers::~CommandBuffers()
+	{
+		if (m_device->GetDevice() != VK_NULL_HANDLE)
+		{
+			vkDeviceWaitIdle(m_device->GetDevice()->logicalDevice);
+
+			for (std::size_t i = 0; i < m_renderingResources.size(); i++)
+			{
+				if (m_renderingResources[i].framebuffer != VK_NULL_HANDLE)
+				{
+					vkDestroyFramebuffer(m_device->GetDevice()->logicalDevice, m_renderingResources[i].framebuffer, nullptr);
+					m_renderingResources[i].framebuffer = VK_NULL_HANDLE;
+				}
+					
+				if (m_renderingResources[i].commandBuffer != VK_NULL_HANDLE)
+				{
+					vkFreeCommandBuffers(m_device->GetDevice()->logicalDevice, m_commandPool, 1, &m_renderingResources[i].commandBuffer);
+					m_renderingResources[i].commandBuffer = VK_NULL_HANDLE;
+				}
+				
+				if (m_renderingResources[i].imageAvailableSemaphore != VK_NULL_HANDLE)
+				{
+					vkDestroySemaphore(m_device->GetDevice()->logicalDevice, m_renderingResources[i].imageAvailableSemaphore, nullptr);
+					m_renderingResources[i].imageAvailableSemaphore = VK_NULL_HANDLE;
+				}
+
+				if (m_renderingResources[i].finishedRenderingSemaphore != VK_NULL_HANDLE)
+				{
+					vkDestroySemaphore(m_device->GetDevice()->logicalDevice, m_renderingResources[i].finishedRenderingSemaphore, nullptr);
+					m_renderingResources[i].finishedRenderingSemaphore = VK_NULL_HANDLE;
+				}
+
+				if (m_renderingResources[i].fence != VK_NULL_HANDLE)
+				{
+					vkDestroyFence(m_device->GetDevice()->logicalDevice, m_renderingResources[i].fence, nullptr);
+					m_renderingResources[i].fence = VK_NULL_HANDLE;
+				}
+			}
+
+			if (m_commandPool != VK_NULL_HANDLE)
+			{
+				vkDestroyCommandPool(m_device->GetDevice()->logicalDevice, m_commandPool, nullptr);
+				m_commandPool = VK_NULL_HANDLE;
+			}
+		}
+	}
+
+	//-------------------------Private method-------------------------
 	bool CommandBuffers::CreateCommandBuffers()
 	{
 		if (!CreateCommandPool(m_device->GetDevice()->presentIndexFamily, &m_commandPool))
@@ -44,125 +99,21 @@ namespace Zx
 		}
 
 		uint32_t imageCount = static_cast<uint32_t>(m_swapChain->GetSwapChain()->image.size());
-		m_commandBuffers.resize(imageCount, VK_NULL_HANDLE);
 
-		if (!AllocateCommandBuffers(imageCount, m_commandPool, &m_commandBuffers[0]))
+		for (std::size_t i = 0; i < m_renderingResources.size(); i++)
 		{
-			std::cout << "Failed to allocate command buffers" << std::endl;
-			return false;
-		}
-
-		return true;
-	}
-
-	/*
-	@brief : Records the command buffers
-	*/
-	bool CommandBuffers::RecordCommandBuffers()
-	{
-		VkCommandBufferBeginInfo commandBufferBeginInfo =
-		{
-			VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-			nullptr,
-			VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,
-			nullptr
-		};
-
-		VkImageSubresourceRange imageSubresourceRange =
-		{
-			VK_IMAGE_ASPECT_COLOR_BIT,
-			0,
-			1,
-			0,
-			1
-		};
-
-		//La couleur orange clair
-		VkClearValue clearValue = 
-		{
-			{ 1.0f, 0.8f, 0.4f, 0.0f },
-		};
-
-		const std::vector<VkImage>& swapChainImage = m_swapChain->GetSwapChain()->image;
-
-		for (std::size_t i = 0; i < m_commandBuffers.size(); ++i) {
-			vkBeginCommandBuffer(m_commandBuffers[i], &commandBufferBeginInfo);
-
-			VkRenderPassBeginInfo renderPassBeginInfo =
+			if (!AllocateCommandBuffers(1, m_commandPool, &m_renderingResources[i].commandBuffer))
 			{
-				VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-				nullptr,
-				m_renderPass->GetRenderPass()->renderPass,
-				m_renderPass->GetRenderPass()->framebuffer[i],
-				{
-					{
-						0,
-						0
-					},
-					{
-						300,
-						300
-					}
-				},
-				1,
-				&clearValue
-			};
-
-			vkCmdBeginRenderPass(m_commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-			vkCmdBindPipeline(m_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->GetPipeline());
-			vkCmdDraw(m_commandBuffers[i], 3, 1, 0, 0);
-			vkCmdEndRenderPass(m_commandBuffers[i]);
-
-			if (vkEndCommandBuffer(m_commandBuffers[i]) != VK_SUCCESS)
-			{
-				std::cout << "Failed to end command buffer" << std::endl;
+				std::cout << "Failed to allocate command buffers" << std::endl;
 				return false;
 			}
 		}
+		
 
 		return true;
 	}
 
-	/*
-	@brief : Destroys ressources about the command buffers and the command pool
-	*/
-	void CommandBuffers::DestroyRessources()
-	{
-		if (m_device->GetDevice()->logicalDevice != VK_NULL_HANDLE) {
-			vkDeviceWaitIdle(m_device->GetDevice()->logicalDevice);
-
-			if ((GetCommandBuffers().size() > 0) && (GetCommandBuffers().data() != VK_NULL_HANDLE)) {
-				vkFreeCommandBuffers(m_device->GetDevice()->logicalDevice, GetCommandPool(), static_cast<uint32_t>(GetCommandBuffers().size()), GetCommandBuffers().data());
-
-				m_commandBuffers.clear();
-			}
-
-			if (GetCommandPool() != VK_NULL_HANDLE) {
-				vkDestroyCommandPool(m_device->GetDevice()->logicalDevice, GetCommandPool(), nullptr);
-				m_commandPool = VK_NULL_HANDLE;
-			}
-		}
-	}
-
-	/*
-	@brief : Destroys a command pool
-	*/
-	void CommandBuffers::DestroyCommandPool()
-	{
-		vkDestroyCommandPool(m_device->GetDevice()->logicalDevice, m_commandPool, nullptr);
-		m_commandPool = VK_NULL_HANDLE;
-	}
-
-	/*
-	@brief : Frees a command buffers
-	*/
-	void CommandBuffers::FreeCommandBuffers()
-	{
-		vkFreeCommandBuffers(m_device->GetDevice()->logicalDevice, m_commandPool, static_cast<uint32_t>(m_commandBuffers.size()), m_commandBuffers.data());
-		m_commandBuffers.clear();
-	}
-
-	//-------------------------Private method-------------------------
+	//------------------------------------------------------------------------
 
 	bool CommandBuffers::CreateCommandPool(uint32_t indexFamily, VkCommandPool* commandPool)
 	{
@@ -170,7 +121,7 @@ namespace Zx
 		{
 			VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
 			nullptr,
-			VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+			VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT,
 			indexFamily
 		};
 
@@ -203,14 +154,5 @@ namespace Zx
 		}
 
 		return true;
-	}
-
-	//------------------------------------------------------------------------
-
-	std::vector<VkCommandBuffer> CommandBuffers::BuildVectorCommandBuffers()
-	{
-		std::vector<VkCommandBuffer> commandBuffer;
-
-		return commandBuffer;
 	}
 }

@@ -51,4 +51,17 @@ namespace Zx
 	{
 		return (m_surfacePlatform->CreateZWindow(width, height, title));
 	}
+
+	/*
+	@brief : Assigns a window by move semantic
+	@param : The window to move
+	@return : A reference to this
+	*/
+	Window& Window::operator=(Window&& window) noexcept
+	{
+		std::swap(m_instance, window.m_instance);
+		std::swap(m_surfacePlatform, window.m_surfacePlatform);
+
+		return (*this);
+	}
 }
