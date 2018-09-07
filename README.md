@@ -1,2 +1,2 @@
-# ZanixEngine
-ZanixEngine is an open source Game Engine in development. He is developed in C++14.
+#Neon
+Neon - A game engine in C++17 with Vulkan support

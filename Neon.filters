@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="includes">
+      <UniqueIdentifier>{5915e463-2114-4fb9-8a6e-2f47b741c300}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\Win">
+      <UniqueIdentifier>{e2f2f34a-fef7-431c-8c89-41445d8ce8e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{eeab9985-89de-493a-a25b-ee3f201594f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Win">
+      <UniqueIdentifier>{b0d76712-4e07-4d97-a878-575c9ad1595f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Zanix\Core\ZException.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Zanix\Core\ZFile.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Zanix\Core\ZILogger.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zanix\core\ZString.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="includes\Zanix\Core\Win\ZPluginPlatform.inl">
+      <Filter>includes\Win</Filter>
+    </None>
+    <None Include="includes\Zanix\Core\ZPlugin.inl">
+      <Filter>includes</Filter>
+    </None>
+    <None Include="includes\zanix\core\ZString.inl">
+      <Filter>src</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="includes\Zanix\Core\Win\ZPluginPlatform.hpp">
+      <Filter>includes\Win</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\Zanix\Core\ZException.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\Zanix\Core\ZFile.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\Zanix\Core\ZILogger.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\Zanix\Core\ZPlugin.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\Zanix\Core\ZString.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\Zanix\ZUtils.hpp" />
+  </ItemGroup>
+</Project>

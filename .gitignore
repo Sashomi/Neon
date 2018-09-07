@@ -31,7 +31,7 @@
 *.out
 *.app
 
-#Zanix
+#Neon
 Debug/*
 modules/*
 Test/*
