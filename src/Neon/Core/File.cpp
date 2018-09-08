@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include <Neon/Core/Exception.hpp>
 #include <Neon/Core/File.hpp>
 
@@ -7,7 +9,7 @@ namespace Zx
 	@brief : Constructs of File
 	@param : A constant reference to the file path of the file
 	*/
-	File::File(const String& filePath)
+	File::File(const String& filePath) : m_path(filePath.GetPtr())
 	{}
 
 	/*
@@ -15,8 +17,7 @@ namespace Zx
 	*/
 	bool File::IsExist() const
 	{
-		return true;
-		//return (boost::filesystem::exists(m_path));
+		return (std::experimental::filesystem::exists(m_path));
 	}
 
 	/*
@@ -26,8 +27,8 @@ namespace Zx
 	String File::GetFilePath() const
 	{
 		ZAssert(IsExist(), "File doesn't exist");
-		return String("Temporaire");
-		//return String(boost::filesystem::canonical(m_path).string());
+
+		return String(std::experimental::filesystem::canonical(m_path).string());
 	}
 
 	/*
@@ -37,8 +38,8 @@ namespace Zx
 	String File::GetFileName() const
 	{
 		ZAssert(IsExist(), "File doesn't exist");
-		return String("Temporaire");
-		//return String(boost::filesystem::basename(m_path));
+
+		return String(m_path.string());
 	}
 
 	/*
@@ -48,8 +49,8 @@ namespace Zx
 	String File::GetFileExtension() const
 	{
 		ZAssert(IsExist(), "File doesn't exist");
-		return String("Temporaire");
-		//return String(m_path.extension().string());
+
+		return String(m_path.extension().string());
 	}
 
 	/*
@@ -58,8 +59,8 @@ namespace Zx
 	*/
 	std::vector<char> File::GetBinaryFileContent() const
 	{
-		/*ZAssert(IsExist(), "File doesn't exist");
-		
+		ZAssert(IsExist(), "File doesn't exist");
+
 		std::ifstream file(m_path.c_str(), std::ios::binary);
 
 		if (file.fail())
@@ -81,7 +82,6 @@ namespace Zx
 		
 		file.close();
 
-		return res;*/
-		return {};
+		return res;
 	}
 }

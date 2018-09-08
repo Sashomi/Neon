@@ -2,6 +2,7 @@
 #define FILE_HPP
 
 #include <iostream>
+#include <filesystem>
 #include <vector>
 
 #include <Neon/Core/String.hpp>
@@ -22,7 +23,7 @@ namespace Zx
 		std::vector<char> GetBinaryFileContent() const;
 
 	private :
-		//std::filesystem m_path;
+		std::experimental::filesystem::path m_path;
 	};
 }
 
