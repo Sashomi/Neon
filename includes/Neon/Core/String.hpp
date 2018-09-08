@@ -1,9 +1,10 @@
 #pragma once
 
-#ifndef ZSTRING_HPP
-#define ZSTRING_HPP
+#ifndef STRING_HPP
+#define STRING_HPP
 
 #include <iostream>
+#include <memory>
 #include <string>
 
 namespace Zx
@@ -96,4 +97,4 @@ namespace Zx
 
 #include "String.inl"
 
-#endif //ZSTRING_HPP
+#endif //STRING_HPP

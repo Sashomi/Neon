@@ -13,6 +13,7 @@
 	#define NEON_IMPORT __declspec(dllimport)
 
 #elif defined(__unix__) || defined(__linux__)
+	#define VK_USE_PLATFORM_XCB_KHR
 	#define NEON_POSIX
 #endif
 

@@ -1,7 +1,7 @@
 #include <string>
 #include <iostream>
-#include <vulkan/vulkan.h>
 
+#include <Neon/Core/String.hpp>
 #include <Neon/Renderer/Posix/Platform.hpp>
 
 namespace Zx
@@ -13,11 +13,11 @@ namespace Zx
 
 	Platform::~Platform()
 	{
-		xcb_destroy_windows(m_connection, m_handle);
+		xcb_destroy_window(m_connection, m_handle);
 		xcb_disconnect(m_connection);
 	}
 
-	bool Platform::CreateZWindow(int width, int height, const char* title)
+	bool Platform::CreateZWindow(int width, int height, const String& title)
 	{
 		int index = 0;
 		m_connection = xcb_connect(nullptr, &index);
@@ -26,7 +26,7 @@ namespace Zx
 			return false;
 
 		const xcb_setup_t* setup = xcb_get_setup(m_connection);
-		xcb_screen_iterator_t screenIterator = xcb_setups_roots_iterator(setup);
+		xcb_screen_iterator_t screenIterator = xcb_setup_roots_iterator(setup);
 
 		while (index-- > 0)
 		{
@@ -48,10 +48,11 @@ namespace Zx
 
 		xcb_flush(m_connection);
 
-		xcb_change_property(m_connection, XCB_PROP_MODE_REPLACE, m_handle, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, std::strlen(title), title);
+		xcb_change_property(m_connection, XCB_PROP_MODE_REPLACE, m_handle, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, title.GetSize(), title.GetPtr());
 
 		return true;
 	}
+	
 	/*
 	@brief : Create a window's surface
 	@return : Returns true if the creation of the window surface is a success, false otherwise

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 
 #include <Neon/Renderer/Device.hpp>
 #include <Neon/Renderer/VertexBuffer.hpp>

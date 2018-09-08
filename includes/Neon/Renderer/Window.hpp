@@ -46,7 +46,7 @@ namespace Zx
 			return m_surfacePlatform->GetSurface();
 		}
 
-		#if defined (NEON_WINDOWS)
+		#if defined(NEON_WINDOWS)
 		inline const HWND& GetHandle() const
 		{
 			return m_surfacePlatform->GetHandle();
@@ -56,13 +56,12 @@ namespace Zx
 		{
 			return m_surfacePlatform->GetWindow();
 		}
-		#elif defined (NEON_POSIX)
-		inline const xcb_connection_t& GetHandle() const
+		#elif defined(NEON_POSIX)
+		inline const xcb_window_t& GetHandle() const
 		{
 			return m_surfacePlatform->GetHandle();
 		}
-
-		inline const xcb_connection_t& GetInstance() const
+		inline xcb_connection_t* GetInstance() const
 		{
 			return m_surfacePlatform->GetWindow();
 		}

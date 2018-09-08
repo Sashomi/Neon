@@ -3,12 +3,18 @@
 
 #include <memory>
 
+#include <Neon/Utils.hpp>
+
+#include <vulkan/vulkan.h>
 #include <xcb/xcb.h>
+
 #include <dlfcn.h>
 #include <cstdlib>
 
 namespace Zx
 {
+	class String;	
+
 	class Platform
 	{
 	public:
@@ -17,7 +23,7 @@ namespace Zx
 
 		~Platform();
 
-		bool CreateZWindow(int width, int height, const char* title);
+		bool CreateZWindow(int width, int height, const String& title);
 		bool CreateSurface();
 
 	public:
@@ -36,7 +42,7 @@ namespace Zx
 			return m_handle;
 		}
 
-		inline xcb_connection_t GetWindow() const
+		inline xcb_connection_t* GetWindow() const
 		{
 			return m_connection;
 		}
