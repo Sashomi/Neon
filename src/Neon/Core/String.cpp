@@ -384,7 +384,6 @@ namespace Zx
 	*/
 	String& String::operator=(String&& string)
 	{
-		std::size_t size = string.GetSize();
 		m_string = std::make_shared<Str>(string.GetSize());
 		std::swap(m_string, string.m_string);
 

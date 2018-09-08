@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <cstring>
 
 #include <Neon/Core/Exception.hpp>
 #include <Neon/Renderer/SwapChain.hpp>

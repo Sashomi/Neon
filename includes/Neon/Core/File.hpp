@@ -1,13 +1,8 @@
-#pragma once
-
-#ifndef ZFILE_HPP
-#define ZFILE_HPP
+#ifndef FILE_HPP
+#define FILE_HPP
 
 #include <iostream>
 #include <vector>
-
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/convenience.hpp>
 
 #include <Neon/Core/String.hpp>
 
@@ -27,8 +22,8 @@ namespace Zx
 		std::vector<char> GetBinaryFileContent() const;
 
 	private :
-		boost::filesystem::path m_path;
+		//std::filesystem m_path;
 	};
 }
 
-#endif //ZFILE_HPP
+#endif //FILE_HPP

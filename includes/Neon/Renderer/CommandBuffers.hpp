@@ -29,7 +29,7 @@ namespace Zx
 	{
 	public:
 		CommandBuffers() = default;
-		CommandBuffers(Device& device, SwapChain& swapChain, Pipeline& pipeline, RenderPass& renderPass);
+		CommandBuffers(Device&, SwapChain&, Pipeline&, RenderPass&);
 		CommandBuffers(const CommandBuffers& commandBuffers);
 
 		~CommandBuffers();
