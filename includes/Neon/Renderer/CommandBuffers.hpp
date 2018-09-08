@@ -35,7 +35,7 @@ namespace Zx
 		~CommandBuffers();
 		
 		inline const VkCommandPool& GetCommandPool() const;
-		inline std::vector<RenderingResourcesData>& GetRenderingResources();
+		inline const std::vector<RenderingResourcesData>& GetRenderingResources() const;
 
 	private:
 		std::vector<RenderingResourcesData> m_renderingResources;

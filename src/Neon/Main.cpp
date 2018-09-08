@@ -36,9 +36,11 @@ int main(void)
 
 	CommandBuffers commandBuffers(device, swap, pipeline, renderPass);
 
-	Sync sync(device, commandBuffers.GetRenderingResources());
+	std::shared_ptr<std::vector<RenderingResourcesData>> renderingRessources = std::make_shared<std::vector<RenderingResourcesData>>(commandBuffers.GetRenderingResources());
 
-	Test1 test1(renderPass, swap, pipeline, vertexBuffer, device, window, commandBuffers, commandBuffers.GetRenderingResources());
+	Sync sync(device, *renderingRessources);
+
+	Test1 test1(renderPass, swap, pipeline, vertexBuffer, device, window, commandBuffers, *renderingRessources);
 	
 	test1.RenderingLoop();
 

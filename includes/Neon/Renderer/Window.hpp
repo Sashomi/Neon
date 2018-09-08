@@ -1,21 +1,26 @@
-#ifndef ZWINDOW_HPP
-#define ZWINDOW_HPP
+#ifndef WINDOW_HPP
+#define WINDOW_HPP
 
 #include <memory>
-#include <Windows.h>
 #include <vulkan/vulkan.h>
 
 #include <Neon/Utils.hpp>
 
 #ifdef NEON_WINDOWS
+	#include <Windows.h>
+#endif
+
+#if defined (NEON_WINDOWS)
 	#include <Neon/Renderer/Win32/Platform.hpp>
+#elif defined (NEON_POSIX)
+	#include <Neon/Renderer/Posix/Platform.hpp>
 #endif
 
 namespace Zx
 {
 	class Renderer;
 	class String;
-
+	//TODO : destructor
 	class Window
 	{
 	public:
@@ -41,6 +46,7 @@ namespace Zx
 			return m_surfacePlatform->GetSurface();
 		}
 
+		#ifdef NEON_WINDOWS
 		inline const HWND& GetHandle() const
 		{
 			return m_surfacePlatform->GetHandle();
@@ -48,8 +54,9 @@ namespace Zx
 
 		inline const HINSTANCE& GetInstance() const
 		{
-			return m_surfacePlatform->GetInstance();
+			return m_surfacePlatform->GetWindow();
 		}
+		#endif
 		
 	private:
 		VkInstance m_instance;
@@ -57,4 +64,4 @@ namespace Zx
 	};
 }
 
-#endif //ZWINDOW_HPP
+#endif //WINDOW_HPP

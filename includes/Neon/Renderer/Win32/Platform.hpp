@@ -1,5 +1,5 @@
-#ifndef ZPLATFORM_HPP
-#define ZPLATFORM_HPP
+#ifndef WINDOWS_PLATFORM_HPP
+#define WINDOWS_PLATFORM_HPP
 
 #include <Windows.h>
 #include <memory>
@@ -17,8 +17,8 @@ namespace Zx
 		Platform(const VkInstance& instance);
 		~Platform() = default;
 
-		bool CreateSurface();
 		bool CreateZWindow(int width, int height, const String& title);
+		bool CreateSurface();
 
 	public:
 		inline void SetVkInstance(const VkInstance& instance)
@@ -36,18 +36,18 @@ namespace Zx
 			return m_windowHandle;
 		}
 
-		inline const HINSTANCE& GetInstance() const
+		inline const HINSTANCE& GetWindow() const
 		{
 			return m_windowInstance;
 		}
 
 	private:
 		VkInstance m_instance;
+		VkSurfaceKHR m_windowSurface;
 
 		HINSTANCE m_windowInstance;
 		HWND m_windowHandle;
-		VkSurfaceKHR m_windowSurface;
 	};
 }
 
-#endif //ZPLATFORM_HPP
+#endif //WINDOWS_PLATFORM_HPP

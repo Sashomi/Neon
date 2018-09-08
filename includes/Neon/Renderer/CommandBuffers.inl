@@ -5,7 +5,7 @@ namespace Zx
 		return m_commandPool;
 	}
 
-	inline std::vector<RenderingResourcesData>& CommandBuffers::GetRenderingResources()
+	inline const std::vector<RenderingResourcesData>& CommandBuffers::GetRenderingResources() const
 	{
 		return m_renderingResources;
 	}

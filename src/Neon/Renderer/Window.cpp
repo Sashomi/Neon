@@ -19,7 +19,7 @@ namespace Zx
 	Window::Window(const VkInstance& instance)
 	{
 		m_instance = instance;
-		m_surfacePlatform = std::make_shared<Platform>();
+		m_surfacePlatform = std::make_shared<Platform>(m_instance);
 	}
 
 	/*

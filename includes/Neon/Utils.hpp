@@ -11,6 +11,9 @@
 
 	#define NEON_EXPORT __declspec(dllexport)
 	#define NEON_IMPORT __declspec(dllimport)
+
+#elif defined(__unix__) || defined(__linux__)
+	#define NEON_POSIX
 #endif
 
 #endif //UTILS_HPP
