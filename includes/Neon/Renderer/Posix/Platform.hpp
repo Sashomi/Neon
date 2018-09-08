@@ -31,12 +31,12 @@ namespace Zx
 			return m_surface;
 		}
 
-		inline const xcb_connection_t& GetHandle() const
+		inline const xcb_window_t& GetHandle() const
 		{
 			return m_handle;
 		}
 
-		inline const xcb_window_t& GetWindow() const
+		inline xcb_connection_t GetWindow() const
 		{
 			return m_connection;
 		}
