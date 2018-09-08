@@ -46,7 +46,6 @@ namespace Zx
 			return m_surfacePlatform->GetSurface();
 		}
 
-		#ifdef NEON_WINDOWS
 		inline const HWND& GetHandle() const
 		{
 			return m_surfacePlatform->GetHandle();
@@ -56,7 +55,6 @@ namespace Zx
 		{
 			return m_surfacePlatform->GetWindow();
 		}
-		#endif
 		
 	private:
 		VkInstance m_instance;

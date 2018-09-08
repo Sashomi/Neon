@@ -1,5 +1,6 @@
 #include <thread>
 
+#include <Neon/Utils.hpp>
 #include <Neon/Core/Plugin.hpp>
 #include <Neon/Core/String.hpp>
 #include <Neon/Core/File.hpp>
@@ -45,15 +46,6 @@ namespace Zx
 		};
 
 		vkBeginCommandBuffer(commandBuffer, &commandBuffersBeginInfo);
-
-		VkImageSubresourceRange imageSubresourceRange =
-		{
-			VK_IMAGE_ASPECT_COLOR_BIT,
-			0,
-			1,
-			0,
-			1
-		};
 
 		VkClearValue clearValue =
 		{
@@ -215,6 +207,7 @@ namespace Zx
 		return true;
 	}
 
+#if defined(NEON_WINDOWS)
 	bool Test1::RenderingLoop()
 	{
 		// Display window
@@ -273,4 +266,92 @@ namespace Zx
 		return result;
 	}
 
+	#elif defined(NEON_POSIX)
+
+	bool Test1::RenderingLoop()
+	{
+		xcb_intern_atom_cookie_t  protocols_cookie = xcb_intern_atom(m_window->GetInstance(), 1, 12, "WM_PROTOCOLS");
+		xcb_intern_atom_reply_t  *protocols_reply = xcb_intern_atom_reply(m_window->GetInstance(), protocols_cookie, 0);
+		xcb_intern_atom_cookie_t  delete_cookie = xcb_intern_atom(m_window->GetInstance(), 0, 16, "WM_DELETE_WINDOW");
+		xcb_intern_atom_reply_t  *delete_reply = xcb_intern_atom_reply(m_window->GetInstance(), delete_cookie, 0);
+		xcb_change_property(m_window->GetInstance(), XCB_PROP_MODE_REPLACE, m_window->GetHandle(), (*protocols_reply).atom, 4, 32, 1, &(*delete_reply).atom);
+		free(protocols_reply);
+
+		xcb_map_window(m_window->GetInstance(), m_window->GetHandle());
+		xcb_flush(m_window->GetInstance());
+
+		xcb_generic_event_t *event;
+		bool loop = true;
+		bool resize = false;
+		bool result = true;
+
+		while (loop) 
+		{
+			event = xcb_poll_for_event(m_window->GetInstance());
+
+			if (event) 
+			{
+				switch (event->response_type & 0x7f) 
+				{
+				case XCB_CONFIGURE_NOTIFY: {
+					xcb_configure_notify_event_t *configure_event = (xcb_configure_notify_event_t*)event;
+					static uint16_t width = configure_event->width;
+					static uint16_t height = configure_event->height;
+
+					if (((configure_event->width > 0) && (width != configure_event->width)) ||
+						((configure_event->height > 0) && (height != configure_event->height))) 
+					{
+						resize = true;
+						width = configure_event->width;
+						height = configure_event->height;
+					}
+				}
+				break;
+				
+				case XCB_CLIENT_MESSAGE:
+					if ((*(xcb_client_message_event_t*)event).data.data32[0] == (*delete_reply).atom) 
+					{
+						loop = false;
+						free(delete_reply);
+					}
+					break;
+				case XCB_KEY_PRESS:
+					loop = false;
+					break;
+				}
+				free(event);
+			}
+			else 
+			{
+				if (resize) 
+				{
+					resize = false;
+					if (!OnWindowSizeChanged()) 
+					{
+						result = false;
+						break;
+					}
+				}
+				if (m_swapChain->IsRenderAvailable()) 
+				{
+					if (!Draw()) {
+						result = false;
+						break;
+					}
+				}
+				else 
+				{
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				}
+			}
+		}
+
+		return result;
+
+	}
+
+	#endif
 }
+
+
+
